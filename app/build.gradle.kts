@@ -66,6 +66,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // Native libraries of the text recognition compressed in the APK (smaller file to download and send).
+    packaging {
+        jniLibs.useLegacyPackaging = true
+    }
+
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
