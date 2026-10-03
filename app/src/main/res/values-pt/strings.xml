@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PetCare</string>
+
+    <string name="tab_today">Hoje</string>
+    <string name="tab_pets">Pets</string>
+    <string name="tab_settings">Ajustes</string>
+
+    <string name="back">Voltar</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Excluir</string>
+    <string name="save">Salvar</string>
+    <string name="next">Continuar</string>
+    <string name="share">Compartilhar</string>
+
+    <string name="dog">Cachorro</string>
+    <string name="cat">Gato</string>
+
+    <!-- Today -->
+    <string name="today">Hoje</string>
+    <string name="tomorrow">Amanhã</string>
+    <string name="yesterday">Ontem</string>
+    <string name="previous_day">Dia anterior</string>
+    <string name="next_day">Próximo dia</string>
+    <string name="back_to_today">Voltar para hoje</string>
+    <string name="all_done">Todos os cuidados do dia foram feitos 🎉</string>
+    <string name="done_count">%1$d de %2$d cuidados feitos</string>
+    <string name="empty_title">Nenhum acompanhamento ainda</string>
+    <string name="empty_text">Cadastre seu pet e fotografe a receita do veterinário: o PetCare monta o plano de cuidados e lembra você de cada dose.</string>
+    <string name="nothing_today">Nada para fazer neste dia</string>
+    <string name="nothing_today_text">Nenhum remédio ou cuidado previsto.</string>
+    <string name="new_follow_up">Novo acompanhamento</string>
+    <string name="late">Atrasado</string>
+    <string name="done_at">Feito às %1$s</string>
+    <string name="mark_done">Marcar como feito</string>
+    <string name="mark_not_done">Desfazer: ainda não feito</string>
+    <string name="dose_number_of">dose %1$d/%2$d</string>
+    <string name="notifications_off_banner">As notificações estão desativadas: você não receberá os lembretes. Toque para ativar.</string>
+
+    <!-- Kinds -->
+    <string name="kind_medication">Remédio</string>
+    <string name="kind_shampoo">Shampoo / banho</string>
+    <string name="kind_eye_drops">Colírio (olhos)</string>
+    <string name="kind_ear_drops">Gotas (ouvidos)</string>
+    <string name="kind_topical">Pomada / spray</string>
+    <string name="kind_injection">Injeção</string>
+    <string name="kind_antiparasitic">Antiparasitário</string>
+    <string name="kind_other">Outro</string>
+
+    <!-- New follow-up -->
+    <string name="step_n">Etapa %1$d de %2$d</string>
+    <string name="which_pet">Para qual pet?</string>
+    <string name="which_pet_text">Escolha um pet já cadastrado ou adicione um novo.</string>
+    <string name="new_pet">Novo pet</string>
+    <string name="pet_name">Nome do pet</string>
+    <string name="scan_title">Documentos do veterinário</string>
+    <string name="scan_text">Fotografe a receita de %1$s (uma foto por página).</string>
+    <string name="scan_tips">Dicas: coloque o documento numa superfície plana, bem iluminado, sem sombra, e enquadre a página inteira. O texto é lido no celular, nada é enviado para a internet.</string>
+    <string name="take_photo">Tirar foto</string>
+    <string name="add_page">Adicionar página</string>
+    <string name="from_gallery">Galeria</string>
+    <string name="page_n">Página %1$d</string>
+    <string name="read_document">Ler a receita</string>
+    <string name="reading">Lendo o documento…</string>
+    <string name="read_error">Não foi possível ler o documento: %1$s</string>
+    <string name="enter_manually">Digitar os cuidados manualmente</string>
+    <string name="review_title">Confira o plano de cuidados</string>
+    <string name="review_text">%1$d cuidado(s) encontrado(s). Toque num cuidado para corrigir; o que está em destaque não foi encontrado na receita e precisa ser conferido.</string>
+    <string name="review_text_manual">Adicione cada remédio, shampoo ou cuidado.</string>
+    <string name="review_nothing_found">Nenhum cuidado reconhecido na foto. Adicione-os manualmente (o texto lido está no fim da página), ou volte para tirar a foto de novo.</string>
+    <string name="to_check">Conferir</string>
+    <string name="to_check_not_found">Não encontrado na receita: conferir</string>
+    <string name="to_check_frequency">Frequência não encontrada na receita: conferir</string>
+    <string name="to_check_duration">Duração não encontrada na receita: conferir</string>
+    <string name="unnamed">Sem nome</string>
+    <string name="remove_item">Remover este cuidado</string>
+    <string name="add_care">Adicionar cuidado</string>
+    <string name="show_text">Ver o texto lido</string>
+    <string name="hide_text">Ocultar o texto lido</string>
+    <plurals name="create_plan">
+        <item quantity="one">Criar o plano (%1$d cuidado)</item>
+        <item quantity="other">Criar o plano (%1$d cuidados)</item>
+    </plurals>
+
+    <!-- Treatment form -->
+    <string name="new_care">Novo cuidado</string>
+    <string name="edit_care">Editar cuidado</string>
+    <string name="field_name">Remédio ou cuidado</string>
+    <string name="field_dose">Dose</string>
+    <string name="field_dose_hint">ex. 1/2 comprimido, 3 gotas, 5 ml</string>
+    <string name="field_when">Quando</string>
+    <string name="every_day">Todos os dias</string>
+    <string name="field_duration">Duração</string>
+    <string name="continuous_switch">Uso contínuo (sem data de término)</string>
+    <string name="continuous">uso contínuo</string>
+    <string name="field_start">Início</string>
+    <string name="first_dose">Primeira dose no primeiro dia:</string>
+    <string name="field_notes">Observações</string>
+    <string name="field_notes_hint">ex. junto com a comida, deixar agir 10 min</string>
+    <string name="see_document">Ver a receita</string>
+    <string name="stop_treatment">Interromper o tratamento</string>
+    <string name="stop_treatment_text">Nenhum lembrete deste cuidado a partir de amanhã. O histórico é mantido.</string>
+    <string name="resume_treatment">Retomar o tratamento</string>
+    <string name="delete_care_title">Excluir “%1$s”?</string>
+    <string name="delete_care_text">O cuidado e o histórico de doses serão apagados.</string>
+    <plurals name="times_per_day">
+        <item quantity="one">%1$dx ao dia</item>
+        <item quantity="other">%1$dx ao dia</item>
+    </plurals>
+    <plurals name="every_n_days">
+        <item quantity="one">todos os dias</item>
+        <item quantity="other">a cada %1$d dias</item>
+    </plurals>
+    <plurals name="during_days">
+        <item quantity="one">por %1$d dia</item>
+        <item quantity="other">por %1$d dias</item>
+    </plurals>
+    <plurals name="days_short">
+        <item quantity="one">%1$d d</item>
+        <item quantity="other">%1$d d</item>
+    </plurals>
+
+    <!-- Pets -->
+    <string name="no_pets">Nenhum pet</string>
+    <string name="no_pets_text">Crie um novo acompanhamento para adicionar seu cachorro ou gato.</string>
+    <plurals name="active_treatments">
+        <item quantity="one">%1$d cuidado em andamento</item>
+        <item quantity="other">%1$d cuidados em andamento</item>
+    </plurals>
+    <string name="today_progress">Hoje: %1$d/%2$d feitos</string>
+    <string name="scan_prescription">Receita</string>
+    <string name="tab_cares">Cuidados</string>
+    <string name="tab_plan">Plano completo</string>
+    <string name="tab_documents">Documentos</string>
+    <string name="ongoing">Em andamento</string>
+    <string name="finished">Concluídos</string>
+    <string name="no_cares">Nenhum cuidado</string>
+    <string name="no_cares_text">Fotografe uma receita ou adicione um cuidado manualmente.</string>
+    <string name="progress_given">%1$d de %2$d doses feitas</string>
+    <string name="from_date">de %1$s</string>
+    <string name="until_date">até %1$s</string>
+    <string name="stopped_on">interrompido em %1$s</string>
+    <string name="not_validated">%1$d dose(s) passada(s) não confirmada(s)</string>
+    <string name="plan_summary">%1$d dias de cuidados · %2$d doses</string>
+    <string name="plan_until">Até %1$s</string>
+    <string name="whole_plan">Plano inteiro</string>
+    <string name="from_today">A partir de hoje</string>
+    <string name="no_documents">Nenhum documento</string>
+    <string name="no_documents_text">As fotos das receitas aparecerão aqui.</string>
+    <string name="pages_count">%1$d página(s)</string>
+    <string name="edit_pet">Editar pet</string>
+    <string name="delete_pet">Excluir pet</string>
+    <string name="delete_pet_title">Excluir %1$s?</string>
+    <string name="delete_pet_text">Todos os cuidados, o histórico e os documentos dele serão apagados.</string>
+    <string name="document">Receita</string>
+    <string name="delete_document">Excluir documento</string>
+    <string name="delete_document_text">As fotos serão apagadas. Os cuidados criados a partir deste documento são mantidos.</string>
+
+    <!-- Settings -->
+    <string name="reminders">Lembretes</string>
+    <string name="notifications_on">Notificações ativadas</string>
+    <string name="notifications_off">Notificações desativadas</string>
+    <string name="notifications_text">Uma notificação na hora de cada dose, com os botões “Feito” e “Em 15 min”.</string>
+    <string name="exact_on">Lembretes na hora exata</string>
+    <string name="exact_off">Lembretes na hora aproximada</string>
+    <string name="exact_text">Sem a permissão “Alarmes e lembretes”, o Android pode atrasar os lembretes alguns minutos.</string>
+    <string name="open_settings">Abrir ajustes</string>
+    <string name="remind_before">Lembrar antes da dose:</string>
+    <string name="on_time">Na hora</string>
+    <string name="test_notification">Enviar um lembrete de teste</string>
+    <string name="test_care_name">Lembrete de teste</string>
+    <string name="backup">Backup</string>
+    <string name="backup_text">Seus dados ficam no celular e são mantidos nas atualizações do app. Você também pode guardar uma cópia (pets, cuidados, histórico; sem as fotos).</string>
+    <string name="export_backup">Exportar</string>
+    <string name="import_backup">Restaurar</string>
+    <string name="import_warning">Os dados atuais serão substituídos pelos do backup.</string>
+    <string name="backup_saved">Backup salvo</string>
+    <string name="backup_restored">Backup restaurado</string>
+    <string name="backup_invalid">Este arquivo não é um backup válido do PetCare</string>
+    <string name="about">Sobre</string>
+    <string name="about_text">O PetCare acompanha os tratamentos dos seus pets. A leitura das receitas é feita no celular, sem internet. Sempre confira o plano com a receita: em caso de dúvida, pergunte ao seu veterinário.</string>
+    <string name="version">Versão %1$s (%2$s)</string>
+    <string name="last_error">Último erro</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel">Lembretes de cuidados</string>
+    <string name="notif_channel_desc">Remédios, banhos e cuidados para dar aos seus pets</string>
+    <string name="notif_title_give">%1$s: dar %2$s</string>
+    <string name="notif_title_shampoo">%1$s: %2$s (banho)</string>
+    <string name="notif_title_drops">%1$s: pingar %2$s</string>
+    <string name="notif_title_apply">%1$s: aplicar %2$s</string>
+    <string name="notif_title_injection">%1$s: injeção %2$s</string>
+    <string name="notif_done">✓ Feito</string>
+    <string name="notif_snooze">Em %1$d min</string>
+</resources>
