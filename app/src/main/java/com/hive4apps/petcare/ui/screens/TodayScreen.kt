@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.NotificationsOff
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +37,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -60,6 +63,10 @@ fun TodayScreen(vm: MainViewModel, onOpenSettings: () -> Unit) {
     val doses = Schedule.dayPlan(data.treatments, day)
     val done = doses.count { it.key in data.done }
     val pets = data.pets.associateBy { it.id }
+    var sharing by rememberSaveable { mutableStateOf(false) }
+    if (sharing) {
+        ShareDayDialog(dayPlanText(LocalContext.current, day, doses, pets, data.done), onDismiss = { sharing = false })
+    }
 
     LazyColumn(contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 96.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item {
@@ -86,8 +93,17 @@ fun TodayScreen(vm: MainViewModel, onOpenSettings: () -> Unit) {
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.next_day))
                 }
             }
-            if (dayOffset != 0L) {
-                TextButton(onClick = { dayOffset = 0 }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.back_to_today)) }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                if (dayOffset != 0L) {
+                    TextButton(onClick = { dayOffset = 0 }) { Text(stringResource(R.string.back_to_today)) }
+                }
+                if (doses.isNotEmpty()) {
+                    TextButton(onClick = { sharing = true }) {
+                        Icon(Icons.Outlined.Share, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.share_day))
+                    }
+                }
             }
         }
         if (!vm.canNotify && data.treatments.isNotEmpty()) {

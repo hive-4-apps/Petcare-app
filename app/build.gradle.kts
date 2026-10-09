@@ -40,7 +40,7 @@ android {
         minSdk = 26
         targetSdk = 35
         // Always increasing, so each CI build can be installed over the previous one.
-        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()?.plus(100) ?: 1
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()?.plus(100) ?: 2
         // Shown in Settings, to check which build is installed.
         versionName = "1.0.$versionCode"
         buildConfigField("String", "GIT_SHA", "\"${System.getenv("GITHUB_SHA")?.take(7) ?: "local"}\"")

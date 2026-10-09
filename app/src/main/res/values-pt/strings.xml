@@ -193,4 +193,13 @@
     <string name="notif_title_injection">%1$s: injeção %2$s</string>
     <string name="notif_done">✓ Feito</string>
     <string name="notif_snooze">Em %1$d min</string>
+    <!-- Share a day -->
+    <string name="share_day">Compartilhar o dia</string>
+    <string name="share_day_title">Cuidados de %1$s</string>
+    <string name="share_done_at">feito às %1$s</string>
+    <string name="share_whatsapp">Enviar pelo WhatsApp</string>
+    <string name="share_other">Outros apps (e-mail, SMS…)</string>
+    <string name="copy_text">Copiar o texto</string>
+    <string name="copied">Texto copiado</string>
+    <string name="whatsapp_missing">O WhatsApp não está instalado: escolha outro app.</string>
 </resources>

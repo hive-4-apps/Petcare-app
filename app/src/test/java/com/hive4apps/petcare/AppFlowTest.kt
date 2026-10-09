@@ -64,6 +64,14 @@ class AppFlowTest {
         assertEquals(1, data.done.size)
         assertTrue(data.done.keys.single().startsWith(data.treatments.single().id))
 
+        // Share the first day of the plan: the text says the dose is done, and it can be copied.
+        rule.onAllNodesWithContentDescription("Partager la journée").onFirst().performClick()
+        rule.onNodeWithText("Copier le texte").performClick()
+        val clipboard = rule.activity.getSystemService(android.content.ClipboardManager::class.java)
+        val shared = clipboard.primaryClip!!.getItemAt(0).text.toString()
+        assertTrue(shared, shared.startsWith("🐾 Soins du "))
+        assertTrue(shared, shared.contains("• 🐱 Minou : Metacam (prise 1/7) ✓ fait à "))
+
         // Back home: the day's plan.
         rule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         rule.onNodeWithText("Aujourd'hui", useUnmergedTree = true)

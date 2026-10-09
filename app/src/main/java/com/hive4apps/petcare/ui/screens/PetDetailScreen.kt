@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -47,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -222,6 +225,13 @@ private fun PlanTab(vm: MainViewModel, pet: Pet, treatments: List<Treatment>, do
     val byDay = doses.groupBy { it.at.toLocalDate() }
     val total = doses.size
     val given = doses.count { it.key in done }
+    var sharingDay by remember { mutableStateOf<LocalDate?>(null) }
+    sharingDay?.let { shared ->
+        ShareDayDialog(
+            dayPlanText(LocalContext.current, shared, byDay[shared].orEmpty(), mapOf(pet.id to pet), done),
+            onDismiss = { sharingDay = null },
+        )
+    }
 
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         item {
@@ -263,6 +273,9 @@ private fun PlanTab(vm: MainViewModel, pet: Pet, treatments: List<Treatment>, do
                         style = MaterialTheme.typography.labelLarge,
                         color = if (dayDone == list.size) DoneGreen else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    IconButton(onClick = { sharingDay = day }) {
+                        Icon(Icons.Outlined.Share, stringResource(R.string.share_day), Modifier.size(20.dp))
+                    }
                 }
             }
             items(list, key = { it.key }) { dose ->
