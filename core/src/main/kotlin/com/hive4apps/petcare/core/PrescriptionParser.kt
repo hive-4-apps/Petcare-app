@@ -15,6 +15,10 @@ data class ParsedCare(
     val timeHint: TimeHint?,
     /** The lines of the document this was read from. */
     val source: String,
+    /** Read from handwriting (AI reading only). */
+    val handwritten: Boolean = false,
+    /** Keeps going this treatment already followed in the app ("Manter...", AI reading only). */
+    val continuesId: String? = null,
 )
 
 /**

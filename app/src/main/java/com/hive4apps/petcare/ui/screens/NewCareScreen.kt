@@ -303,6 +303,15 @@ private fun ReviewStep(vm: MainViewModel, flow: NewCareFlow) {
                     },
                 )
             }
+            if (flow.readByAi || flow.aiError != null) {
+                item {
+                    Text(
+                        if (flow.readByAi) stringResource(R.string.read_by_ai) else stringResource(R.string.ai_failed, flow.aiError.orEmpty()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (flow.readByAi) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
             itemsIndexed(flow.drafts.toList(), key = { _, d -> d.id }) { index, draft ->
                 val open = expanded == draft.id
                 OutlinedCard(
@@ -333,6 +342,16 @@ private fun ReviewStep(vm: MainViewModel, flow: NewCareFlow) {
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                                if (draft.continuesName != null || draft.handwritten) {
+                                    Text(
+                                        listOfNotNull(
+                                            draft.continuesName?.let { stringResource(R.string.continues_care, it) },
+                                            stringResource(R.string.handwritten).takeIf { draft.handwritten },
+                                        ).joinToString(" · "),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
                                 if (draft.guessed.isNotEmpty() && draft.include) {
                                     Text(
                                         stringResource(R.string.to_check),

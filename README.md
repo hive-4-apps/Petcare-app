@@ -4,7 +4,8 @@ Application Android (français / português do Brasil) pour suivre les traitemen
 
 1. **Nouveau suivi** : choisir un animal déjà enregistré ou en créer un (nom, chien ou chat).
 2. **Photo des documents du vétérinaire** (une photo par page, ou depuis la galerie). Le texte est lu
-   **sur le téléphone** (ML Kit, hors ligne) : rien n'est envoyé sur Internet.
+   **sur le téléphone** (ML Kit, hors ligne) : rien n'est envoyé sur Internet. Cette lecture comprend le texte
+   imprimé, pas l'écriture à la main : voir **Lecture par IA** ci-dessous.
 3. PetCare retrouve chaque **médicament, shampooing, collyre, pommade…** avec la dose, la fréquence et la
    durée, puis affiche un écran de **vérification** : tout est modifiable, ce qui n'a pas été trouvé sur
    l'ordonnance est signalé « À vérifier ».
@@ -30,6 +31,22 @@ Application Android (français / português do Brasil) pour suivre les traitemen
 
 Un traitement commencé le soir se termine le matin après le dernier jour : le nombre total de prises est
 toujours respecté (ex. 2 fois par jour pendant 7 jours = 14 prises).
+
+## Lecture par IA (écriture manuscrite)
+
+Option dans **Réglages → Lecture par IA** : avec une clé API Anthropic (à créer sur
+[platform.claude.com](https://platform.claude.com/settings/keys), facturée sur ce compte, quelques centimes par
+ordonnance), les photos sont lues par **Claude** (`claude-opus-5-5`) :
+
+- le texte **manuscrit** est lu comme l'imprimé (ajouts à la main sous la signature, dans la marge…) ;
+- chaque soin revient directement avec sa dose, sa fréquence, sa durée et le type de soin ;
+- un « *Manter banhos 15/15 dias* » / « *Maintenir…* » est relié au soin **déjà suivi** pour cet animal : le soin
+  continue (sans durée s'il n'en est pas donnée), à la date où la prochaine prise était prévue, et l'ancien
+  s'arrête là ; l'écran de vérification affiche « Continue « … » » et « Manuscrit ».
+
+Les photos sont alors envoyées à Anthropic. Sans clé, sans réseau ou en cas d'erreur, l'application revient à la
+lecture hors ligne (le message d'erreur est affiché sur l'écran de vérification). La clé reste sur le téléphone
+(hors sauvegarde). Appel HTTP direct (`core/.../AiPrescriptionReader.kt`) : le SDK Java officiel pèse ~40 Mo.
 
 ## Installer sur le téléphone (adb)
 

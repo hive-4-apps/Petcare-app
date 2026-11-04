@@ -179,7 +179,7 @@
     <string name="backup_restored">Sauvegarde restaurée</string>
     <string name="backup_invalid">Ce fichier n\'est pas une sauvegarde PetCare valide</string>
     <string name="about">À propos</string>
-    <string name="about_text">PetCare suit les traitements de vos animaux. La lecture des ordonnances se fait sur le téléphone, sans connexion. Vérifiez toujours le plan avec l\'ordonnance : en cas de doute, demandez à votre vétérinaire.</string>
+    <string name="about_text">PetCare suit les traitements de vos animaux. La lecture des ordonnances se fait sur le téléphone, sans connexion, ou par l\'IA si vous l\'avez activée. Vérifiez toujours le plan avec l\'ordonnance : en cas de doute, demandez à votre vétérinaire.</string>
     <string name="version">Version %1$s (%2$s)</string>
     <string name="last_error">Dernière erreur</string>
 
@@ -202,4 +202,17 @@
     <string name="copy_text">Copier le texte</string>
     <string name="copied">Texte copié</string>
     <string name="whatsapp_missing">WhatsApp n\'est pas installé : choisissez une autre application.</string>
+    <!-- AI reading (Claude) -->
+    <string name="read_by_ai">Lu par l\'IA (Claude), écriture manuscrite comprise. Vérifiez chaque soin avant de valider.</string>
+    <string name="ai_failed">Lecture par l\'IA impossible (%1$s) : lecture sur le téléphone utilisée, l\'écriture manuscrite n\'a peut-être pas été lue.</string>
+    <string name="continues_care">Continue « %1$s »</string>
+    <string name="handwritten">Manuscrit</string>
+    <string name="ai_reading">Lecture par IA</string>
+    <string name="ai_reading_text">Sans connexion, le téléphone lit le texte imprimé mais pas l\'écriture à la main. Avec une clé API Anthropic, les ordonnances sont lues par l\'IA Claude : écriture manuscrite comprise, et les « Manter… / Maintenir… » sont reliés aux soins déjà suivis. Les photos sont alors envoyées à Anthropic pour la lecture (quelques centimes par ordonnance, facturés sur votre compte Anthropic). La clé reste sur ce téléphone.</string>
+    <string name="ai_on">Lecture par IA activée</string>
+    <string name="ai_on_text">Les photos des ordonnances sont envoyées à Claude (Anthropic) pour être lues. Sans réseau, le téléphone les lit lui-même.</string>
+    <string name="ai_remove_key">Retirer la clé</string>
+    <string name="ai_key">Clé API Anthropic</string>
+    <string name="ai_save_key">Activer</string>
+    <string name="ai_get_key">Obtenir une clé</string>
 </resources>

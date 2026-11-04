@@ -3,6 +3,7 @@ package com.hive4apps.petcare.ui
 import com.hive4apps.petcare.core.CareKind
 import com.hive4apps.petcare.core.HH_MM
 import com.hive4apps.petcare.core.ParsedCare
+import com.hive4apps.petcare.core.Schedule
 import com.hive4apps.petcare.core.Treatment
 import com.hive4apps.petcare.core.defaultTimes
 import com.hive4apps.petcare.core.parseTime
@@ -27,6 +28,11 @@ data class Draft(
     val guessed: Set<Field> = emptySet(),
     val source: String = "",
     val documentId: String? = null,
+    /** Read from handwriting by the AI. */
+    val handwritten: Boolean = false,
+    /** Keeps going this treatment already followed ("Manter..."): it is stopped where this one starts. */
+    val continuesId: String? = null,
+    val continuesName: String? = null,
 ) {
     enum class Field { FREQUENCY, DURATION, DOSE }
 
@@ -79,7 +85,37 @@ data class Draft(
                 continuous = p.continuous && p.durationDays == null,
                 guessed = guessed,
                 source = p.source,
+                handwritten = p.handwritten,
             ).startingFrom(now)
+        }
+
+        /**
+         * A care the prescription says to keep ("Manter banhos 15/15 dias") for a treatment already followed: same
+         * name and kind, the frequency and dose of the prescription (or the old ones when it gives none), and the
+         * next dose falls when the old treatment would have given it (no extra bath today if the last was 5 days ago).
+         */
+        fun continuing(p: ParsedCare, old: Treatment, now: LocalDateTime): Draft {
+            val read = fromParsed(p, now)
+            val sameFrequency = p.perDay == null && p.everyDays == null
+            val draft = read.copy(
+                name = old.name,
+                kind = old.kind,
+                dose = p.dose ?: old.dose,
+                // Same number of doses a day: keep the hours the user already chose.
+                times = if (sameFrequency || (p.perDay ?: 1) == old.times.size) old.times else read.times,
+                everyDays = if (sameFrequency) old.everyDays else read.everyDays,
+                notes = old.notes,
+                guessed = read.guessed.filterNot { it == Field.FREQUENCY || it == Field.DOSE && old.dose.isNotBlank() }.toSet(),
+                continuesId = old.id,
+                continuesName = old.name,
+            )
+            val next = if (Schedule.isFinished(old, now.toLocalDate())) {
+                null
+            } else {
+                Schedule.doses(old, now.toLocalDate(), now.toLocalDate().plusDays(old.everyDays.toLong() + 1))
+                    .firstOrNull { it.at >= now.minusMinutes(30) }
+            }
+            return draft.copy(startDate = next?.at?.toLocalDate() ?: now.toLocalDate(), startTime = null).startingFrom(now)
         }
 
         fun fromTreatment(t: Treatment): Draft = Draft(

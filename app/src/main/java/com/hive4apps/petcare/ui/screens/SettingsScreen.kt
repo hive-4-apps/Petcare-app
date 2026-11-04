@@ -18,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Alarm
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Notifications
@@ -27,6 +28,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +43,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.hive4apps.petcare.BuildConfig
 import com.hive4apps.petcare.R
@@ -123,6 +126,36 @@ fun SettingsScreen(vm: MainViewModel) {
             Reminders.notifyDose(context, Dose(sample, LocalDateTime.now(), 1, null))
             if (!Reminders.canNotify(context)) Toast.makeText(context, R.string.notifications_off, Toast.LENGTH_SHORT).show()
         }) { Text(stringResource(R.string.test_notification)) }
+
+        SectionTitle(stringResource(R.string.ai_reading))
+        Text(stringResource(R.string.ai_reading_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (vm.aiKeySet) {
+            StatusCard(
+                icon = Icons.Outlined.AutoAwesome,
+                ok = true,
+                title = stringResource(R.string.ai_on),
+                text = stringResource(R.string.ai_on_text),
+                action = stringResource(R.string.ai_remove_key),
+                onAction = { vm.setAiKey(null) },
+            )
+        } else {
+            var key by remember { mutableStateOf("") }
+            OutlinedTextField(
+                value = key,
+                onValueChange = { key = it.trim() },
+                label = { Text(stringResource(R.string.ai_key)) },
+                placeholder = { Text("sk-ant-…") },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedButton(onClick = { vm.setAiKey(key) }, enabled = key.length > 20) { Text(stringResource(R.string.ai_save_key)) }
+                TextButton(onClick = {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://platform.claude.com/settings/keys")))
+                }) { Text(stringResource(R.string.ai_get_key)) }
+            }
+        }
 
         SectionTitle(stringResource(R.string.backup))
         Text(stringResource(R.string.backup_text), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
