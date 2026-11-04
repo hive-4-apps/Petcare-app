@@ -4,7 +4,8 @@ Application Android (français / português do Brasil) pour suivre les traitemen
 
 1. **Nouveau suivi** : choisir un animal déjà enregistré ou en créer un (nom, chien ou chat).
 2. **Photo des documents du vétérinaire** (une photo par page, ou depuis la galerie). Le texte est lu
-   **sur le téléphone** (ML Kit, hors ligne) : rien n'est envoyé sur Internet.
+   **sur le téléphone** (ML Kit, hors ligne) : rien n'est envoyé sur Internet. Cette lecture comprend le texte
+   imprimé, pas l'écriture à la main : voir **Écriture à la main** ci-dessous.
 3. PetCare retrouve chaque **médicament, shampooing, collyre, pommade…** avec la dose, la fréquence et la
    durée, puis affiche un écran de **vérification** : tout est modifiable, ce qui n'a pas été trouvé sur
    l'ordonnance est signalé « À vérifier ».
@@ -31,6 +32,37 @@ Application Android (français / português do Brasil) pour suivre les traitemen
 Un traitement commencé le soir se termine le matin après le dernier jour : le nombre total de prises est
 toujours respecté (ex. 2 fois par jour pendant 7 jours = 14 prises).
 
+## Écriture à la main
+
+Deux façons, au choix :
+
+- **Gratuit : « Coller le texte de l'ordonnance »** (étape photo). Ouvrir la photo dans Google Lens (ou une appli
+  d'IA gratuite), copier le texte, le coller : PetCare retrouve les soins hors ligne, comme pour une photo. Les
+  lignes « *Manter banhos 15/15 dias* » / « *Maintenir…* » continuent le soin déjà suivi qui a un mot du même nom,
+  sinon le dernier soin du même type (bain, lotion…).
+- **Automatique : lecture par IA** (ci-dessous), gratuite avec une clé Gemini.
+
+### Lecture par IA
+
+Option dans **Réglages → Lecture par IA** : on colle une clé API, et l'application reconnaît l'IA à la clé.
+
+| Clé | Où la créer | Coût | Photos |
+| --- | --- | --- | --- |
+| **Gemini** (`AIza…`) | [aistudio.google.com/apikey](https://aistudio.google.com/apikey), avec un compte Google | gratuit dans la limite de l'offre gratuite | envoyées à Google, qui peut s'en servir pour améliorer ses modèles (offre gratuite) |
+| **Claude** (`sk-ant-…`) | [platform.claude.com](https://platform.claude.com/settings/keys) | crédits prépayés, quelques centimes par ordonnance | envoyées à Anthropic |
+
+Modèles : `gemini-flash-latest` (alias du dernier Gemini Flash) et `claude-opus-5-5`. Avec l'un ou l'autre :
+
+- le texte **manuscrit** est lu comme l'imprimé (ajouts à la main sous la signature, dans la marge…) ;
+- chaque soin revient directement avec sa dose, sa fréquence, sa durée et le type de soin ;
+- un « *Manter banhos 15/15 dias* » / « *Maintenir…* » est relié au soin **déjà suivi** pour cet animal : le soin
+  continue (sans durée s'il n'en est pas donnée), à la date où la prochaine prise était prévue, et l'ancien
+  s'arrête là ; l'écran de vérification affiche « Continue « … » » et « Manuscrit ».
+
+Sans clé, sans réseau, quota gratuit épuisé ou en cas d'erreur, l'application revient à la lecture hors ligne (le
+message d'erreur est affiché sur l'écran de vérification). La clé reste sur le téléphone (hors sauvegarde). Appels
+HTTP directs (`core/.../AiPrescriptionReader.kt`) : le SDK Java d'Anthropic pèse ~40 Mo.
+
 ## Installer sur le téléphone (adb)
 
 Avec [Platform Tools](https://developer.android.com/tools/releases/platform-tools) et le débogage USB activé :
@@ -56,7 +88,7 @@ secrets du dépôt et jamais dans le code :
 
 (GitHub → *Settings* → *Secrets and variables* → *Actions* → *New repository secret*.)
 Sans ces secrets, la CI compile mais ne publie pas d'APK. Empreinte SHA-256 du certificat :
-`DE:64:B7:85:2B:E4:9E:93:BD:0F:33:C1:B1:11:04:41:B3:93:73:BA:FA:1E:75:72:B7:C1:53:07:FC:8D:62:7E`.
+`4A:51:23:FF:09:47:52:C7:C3:67:4F:2D:D3:17:91:19:A6:D4:30:0F:3D:0E:63:50:95:A1:09:FE:6F:0A:FB:BE`.
 
 En local, un fichier `keystore.properties` (ignoré par git) à la racine suffit :
 

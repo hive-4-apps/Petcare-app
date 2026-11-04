@@ -15,6 +15,12 @@ data class ParsedCare(
     val timeHint: TimeHint?,
     /** The lines of the document this was read from. */
     val source: String,
+    /** Read from handwriting (AI reading only). */
+    val handwritten: Boolean = false,
+    /** Keeps going this treatment already followed in the app ("Manter...", AI reading only). */
+    val continuesId: String? = null,
+    /** Written as "keep going" ("Manter...", "Maintenir..."): a treatment the pet may already follow. */
+    val maintain: Boolean = false,
 )
 
 /**
@@ -47,7 +53,9 @@ object PrescriptionParser {
     private fun readBlock(block: List<String>): ParsedCare? {
         val all = block.joinToString(" ")
         val n = norm(all)
-        val name = cleanName(block.first()) ?: return null
+        val maintain = MAINTAIN.containsMatchIn(norm(block.first()).replace(ITEM_MARK, ""))
+        val name = cleanName(block.first().let { if (maintain) it.replace(ITEM_MARK, "").replace(MAINTAIN_WORD, "") else it })
+            ?: return null
         val kind = kindOf(n)
         val freq = frequency(n)
         val duration = duration(n)
@@ -65,10 +73,28 @@ object PrescriptionParser {
             perDay = freq?.perDay,
             everyDays = freq?.everyDays,
             durationDays = duration,
-            continuous = CONTINUOUS.containsMatchIn(n),
+            // "Manter banhos 15/15 dias": kept going, with no end unless one is written.
+            continuous = CONTINUOUS.containsMatchIn(n) || maintain && duration == null,
             timeHint = timeHint(n),
             source = block.joinToString("\n"),
+            maintain = maintain,
         )
+    }
+
+    private val ITEM_MARK = Regex("^\\s*[•●▪·*\\-–]\\s*")
+    private val MAINTAIN = Regex("^(manter|mantenha|continuar|continue|seguir com|maintenir|maintenez|continuer|poursuivre)\\b")
+    private val MAINTAIN_WORD = Regex("^(?i)\\s*(manter|mantenha|continuar|continue|seguir com|maintenir|maintenez|continuer|poursuivre)\\s+")
+
+    /**
+     * The pet's treatment a "Manter..." line keeps going: the one sharing a word of its name ("Loção Zelotril" for
+     * "Manter loção nas lesões"), else the latest one of the same kind ("Banhos" -> the shampoo).
+     */
+    fun continuedTreatment(care: ParsedCare, treatments: List<Treatment>): Treatment? {
+        if (!care.maintain) return null
+        val words = norm(care.name).split(Regex("[^a-z]+")).filter { it.length >= 4 }.toSet()
+        val latest = treatments.sortedByDescending { it.startDate }
+        return latest.firstOrNull { t -> norm(t.name).split(Regex("[^a-z]+")).any { it in words } }
+            ?: latest.firstOrNull { it.kind == care.kind }
     }
 
     // ---- Text helpers ----
@@ -108,7 +134,7 @@ object PrescriptionParser {
             "(paciente|animal|nome|tutor|proprietario|responsavel|especie|raca|sexo|idade|peso|data|" +
             "patient|nom|proprietaire|espece|race|age|poids|date|adresse|endereco|telefone|tel|cpf|rg)\\s*:|" +
             "crmv|ordre des veterinaires|dr\\.?a?\\s|dra\\s|docteur|assinatura|signature|carimbo|cachet|" +
-            "clinica|hospital veterinario|clinique|cabinet|retorno|retour|revisao|proxima consulta|prochain rendez-vous|" +
+            "clinica|hospital veterinario|farmacia|pharmacie|clinique|cabinet|retorno|retour|revisao|proxima consulta|prochain rendez-vous|" +
             "medica? veterinari|veterinaire\\b)",
     )
 
@@ -120,7 +146,7 @@ object PrescriptionParser {
         var s = line
             .replace(Regex("^\\s*(\\d{1,2}\\s*[).:\\-–]|\\d{1,2}\\s*[ºo°]\\s|[•●▪·*\\-–]\\s)\\s*"), "")
             // "Apoquel 16 mg ........ 1 caixa", "Otosyn — 1 frasco"
-            .replace(Regex("[._…]{2,}.*$"), "")
+            .replace(Regex("[._…]{2,}.*$|[-–—]{3,}.*$"), "")
             .replace(
                 Regex(
                     "\\s*[-–—(]?\\s*\\b(\\d+|uma?|une?)\\s+(caixas?|frascos?|bisnagas?|tubos?|cartelas?|boites?|boîtes?|flacons?|tubes?|unidades?|unites?|unités?)\\b.*$",
@@ -134,6 +160,9 @@ object PrescriptionParser {
         val n = norm(s)
         val cut = INSTRUCTION.find(n)?.range?.first
         if (cut != null && cut > 2) s = s.take(cut.coerceAtMost(s.length)).trim(' ', '-', '–', ':', ',', ';', '.')
+        // "Banhos 15/15 dias", "Loção nas lesões, 2x" -> the frequency is not part of the name.
+        val freqAt = Regex("\\b\\d+\\s*(/\\s*\\d+\\s*(h|hs|horas?|dias?|jours?)\\b|x\\b)", RegexOption.IGNORE_CASE).find(s)?.range?.first
+        if (freqAt != null && freqAt > 2) s = s.take(freqAt).trim(' ', '-', '–', ':', ',', ';', '.')
         // "Cefalexina 500mg - 1 comp", "Milbemax chat : 1 comprimé" -> the dose is not part of the name.
         val doseAt = DOSE.find(s)?.range?.first
         if (doseAt != null && doseAt > 2) s = s.take(doseAt).trim(' ', '-', '–', ':', ',', ';', '.')
@@ -144,7 +173,7 @@ object PrescriptionParser {
     // ---- Kind ----
 
     private fun kindOf(n: String): CareKind = when {
-        Regex("\\b(shampoo|shampooing|xampu|banho|bain|sabonete|lavar|laver)\\b").containsMatchIn(n) -> CareKind.SHAMPOO
+        Regex("\\b(shampoo|shampooing|xampu|banhos?|bains?|sabonete|lavar|laver)\\b").containsMatchIn(n) -> CareKind.SHAMPOO
         Regex("\\b(colirio|collyre|oftalm|ophtalm|olhos?|yeux|oeil|ocular|oculaire)").containsMatchIn(n) -> CareKind.EYE_DROPS
         Regex("\\b(otolog|auricular|ouvidos?|oreilles?|otite|conduto)").containsMatchIn(n) -> CareKind.EAR_DROPS
         Regex("\\b(injet|injec|subcutan|sous-cutan|intramuscular|vacina|vaccin)").containsMatchIn(n) -> CareKind.INJECTION

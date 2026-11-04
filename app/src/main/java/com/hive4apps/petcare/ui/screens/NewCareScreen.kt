@@ -28,11 +28,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -60,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -175,6 +178,8 @@ private fun DocumentStep(vm: MainViewModel, flow: NewCareFlow) {
     val context = LocalContext.current
     // Kept as a path: the camera app may push this screen out of memory.
     var pendingPhoto by rememberSaveable { mutableStateOf<String?>(null) }
+    var pasting by rememberSaveable { mutableStateOf(false) }
+    if (pasting) PasteTextDialog(onDismiss = { pasting = false }, onRead = { pasting = false; vm.readPastedText(it) })
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         val file = pendingPhoto?.let(::File)
         if (ok && file != null && file.length() > 0) flow.pages += file else file?.delete()
@@ -272,6 +277,11 @@ private fun DocumentStep(vm: MainViewModel, flow: NewCareFlow) {
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.enter_manually))
             }
+            TextButton(onClick = { pasting = true }, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Outlined.ContentPaste, null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.paste_text))
+            }
         }
     }
 }
@@ -303,6 +313,15 @@ private fun ReviewStep(vm: MainViewModel, flow: NewCareFlow) {
                     },
                 )
             }
+            if (flow.readByAi || flow.aiError != null) {
+                item {
+                    Text(
+                        if (flow.readByAi) stringResource(R.string.read_by_ai, vm.aiProvider?.label ?: "IA") else stringResource(R.string.ai_failed, flow.aiError.orEmpty()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (flow.readByAi) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
+                    )
+                }
+            }
             itemsIndexed(flow.drafts.toList(), key = { _, d -> d.id }) { index, draft ->
                 val open = expanded == draft.id
                 OutlinedCard(
@@ -333,6 +352,16 @@ private fun ReviewStep(vm: MainViewModel, flow: NewCareFlow) {
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
+                                if (draft.continuesName != null || draft.handwritten) {
+                                    Text(
+                                        listOfNotNull(
+                                            draft.continuesName?.let { stringResource(R.string.continues_care, it) },
+                                            stringResource(R.string.handwritten).takeIf { draft.handwritten },
+                                        ).joinToString(" · "),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
                                 if (draft.guessed.isNotEmpty() && draft.include) {
                                     Text(
                                         stringResource(R.string.to_check),
@@ -394,4 +423,32 @@ private fun ReviewStep(vm: MainViewModel, flow: NewCareFlow) {
             Text(pluralStringResource(R.plurals.create_plan, count, count))
         }
     }
+}
+
+/** Text of the prescription read by another app (Google Lens reads handwriting), pasted here. */
+@Composable
+private fun PasteTextDialog(onDismiss: () -> Unit, onRead: (String) -> Unit) {
+    val clipboard = LocalClipboardManager.current
+    var text by rememberSaveable { mutableStateOf(clipboard.getText()?.text.orEmpty()) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.paste_text)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.paste_text_help), style = MaterialTheme.typography.bodySmall)
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text(stringResource(R.string.paste_text_label)) },
+                    minLines = 6,
+                    maxLines = 12,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onRead(text) }, enabled = text.isNotBlank()) { Text(stringResource(R.string.read_document)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+    )
 }
