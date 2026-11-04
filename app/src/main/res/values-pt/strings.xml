@@ -129,6 +129,15 @@
         <item quantity="other">%1$d cuidados em andamento</item>
     </plurals>
     <string name="today_progress">Hoje: %1$d/%2$d feitos</string>
+    <string name="close_follow_up">Encerrar o acompanhamento</string>
+    <string name="close_follow_up_title">Encerrar o acompanhamento de %1$s?</string>
+    <string name="close_follow_up_text">Os cuidados em andamento são interrompidos e nenhum lembrete tocará mais para %1$s. O histórico e os documentos são mantidos, e o acompanhamento pode ser reaberto.</string>
+    <string name="reopen_follow_up">Reabrir o acompanhamento</string>
+    <string name="follow_up_closed_on">Acompanhamento encerrado em %1$s</string>
+    <string name="closed_follow_ups">Acompanhamentos encerrados</string>
+    <string name="delete_follow_up">Excluir o acompanhamento</string>
+    <string name="delete_follow_up_title">Excluir o acompanhamento de %1$s?</string>
+    <string name="delete_follow_up_text">Todos os cuidados, o histórico das doses e as receitas de %1$s serão apagados. %1$s continua nos seus animais para começar um novo acompanhamento.</string>
     <string name="scan_prescription">Receita</string>
     <string name="tab_cares">Cuidados</string>
     <string name="tab_plan">Plano completo</string>

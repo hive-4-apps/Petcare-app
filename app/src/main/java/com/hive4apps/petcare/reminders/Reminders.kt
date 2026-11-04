@@ -47,7 +47,7 @@ object Reminders {
             val data = Store.get(context).data.value
             val advance = data.reminderAdvanceMinutes.toLong()
             val now = LocalDateTime.now()
-            val next = Schedule.nextDoseAfter(data.treatments, now.plusMinutes(advance), data.done.keys)
+            val next = Schedule.nextDoseAfter(data.treatmentsFollowedOn(now.toLocalDate()), now.plusMinutes(advance), data.done.keys)
             val alarms = context.getSystemService(AlarmManager::class.java)
             val pending = PendingIntent.getBroadcast(
                 context, 0,
@@ -99,7 +99,7 @@ object Reminders {
         val from = moment.minusHours(1)
         val until = moment.plusMinutes(advance + 1)
         return listOf(from.toLocalDate(), until.toLocalDate()).distinct()
-            .flatMap { day -> Schedule.dayPlan(data.treatments, day) }
+            .flatMap { day -> Schedule.dayPlan(data.treatmentsFollowedOn(day), day) }
             .filter { it.at > from && it.at <= until && it.key !in data.done }
             .distinctBy { it.key }
     }
@@ -107,8 +107,10 @@ object Reminders {
     fun findDose(context: Context, doseKey: String): Dose? {
         val parts = doseKey.split('|')
         if (parts.size != 3) return null
-        val treatment = Store.get(context).data.value.treatments.find { it.id == parts[0] } ?: return null
         val day = runCatching { LocalDate.parse(parts[1]) }.getOrNull() ?: return null
+        // A follow-up closed since: the snoozed reminder does not ring.
+        val treatment = Store.get(context).data.value.treatmentsFollowedOn(LocalDate.now())
+            .find { it.id == parts[0] } ?: return null
         return Schedule.dosesOn(treatment, day).find { it.key == doseKey }
     }
 

@@ -17,10 +17,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -76,6 +79,9 @@ fun PetDetailScreen(vm: MainViewModel, petId: String) {
     var menu by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
+    var closing by remember { mutableStateOf(false) }
+    var deletingFollowUp by remember { mutableStateOf(false) }
+    val closedOn = pet.closedOn?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -95,11 +101,50 @@ fun PetDetailScreen(vm: MainViewModel, petId: String) {
                     leadingIcon = { Icon(Icons.Outlined.Edit, null) },
                     onClick = { menu = false; renaming = true },
                 )
+                if (pet.closedOn == null) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.close_follow_up)) },
+                        leadingIcon = { Icon(Icons.Outlined.TaskAlt, null) },
+                        onClick = { menu = false; closing = true },
+                    )
+                } else {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.reopen_follow_up)) },
+                        leadingIcon = { Icon(Icons.Outlined.Replay, null) },
+                        onClick = { menu = false; vm.store.reopenFollowUp(pet.id) },
+                    )
+                }
+                if (treatments.isNotEmpty()) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.delete_follow_up)) },
+                        leadingIcon = { Icon(Icons.Outlined.DeleteSweep, null) },
+                        onClick = { menu = false; deletingFollowUp = true },
+                    )
+                }
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.delete_pet)) },
                     leadingIcon = { Icon(Icons.Outlined.Delete, null) },
                     onClick = { menu = false; deleting = true },
                 )
+            }
+        }
+        if (pet.closedOn != null) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp).fillMaxWidth(),
+            ) {
+                Row(Modifier.padding(start = 14.dp, end = 6.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.TaskAlt, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        closedOn?.let { stringResource(R.string.follow_up_closed_on, shortDate(it)) }
+                            ?: stringResource(R.string.closed_follow_ups),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = { vm.store.reopenFollowUp(pet.id) }) { Text(stringResource(R.string.reopen_follow_up)) }
+                }
             }
         }
         Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -120,13 +165,41 @@ fun PetDetailScreen(vm: MainViewModel, petId: String) {
             }
         }
         when (tab) {
-            0 -> CaresTab(vm, treatments, data.done.keys)
+            0 -> CaresTab(vm, treatments, data.done.keys, closed = pet.closedOn != null)
             1 -> PlanTab(vm, pet, treatments, data.done)
             else -> DocumentsTab(vm, petId)
         }
     }
 
     if (renaming) PetDialog(pet, onDismiss = { renaming = false }) { vm.store.updatePet(it); renaming = false }
+    if (closing) {
+        AlertDialog(
+            onDismissRequest = { closing = false },
+            title = { Text(stringResource(R.string.close_follow_up_title, pet.name)) },
+            text = { Text(stringResource(R.string.close_follow_up_text, pet.name)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    closing = false
+                    vm.store.closeFollowUp(pet.id, vm.today)
+                }) { Text(stringResource(R.string.close_follow_up)) }
+            },
+            dismissButton = { TextButton(onClick = { closing = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
+    if (deletingFollowUp) {
+        AlertDialog(
+            onDismissRequest = { deletingFollowUp = false },
+            title = { Text(stringResource(R.string.delete_follow_up_title, pet.name)) },
+            text = { Text(stringResource(R.string.delete_follow_up_text, pet.name)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    deletingFollowUp = false
+                    vm.store.deleteFollowUp(pet.id)
+                }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { deletingFollowUp = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
     if (deleting) {
         AlertDialog(
             onDismissRequest = { deleting = false },
@@ -145,21 +218,22 @@ fun PetDetailScreen(vm: MainViewModel, petId: String) {
 }
 
 @Composable
-private fun CaresTab(vm: MainViewModel, treatments: List<Treatment>, done: Set<String>) {
-    val (finished, active) = treatments.partition { Schedule.isFinished(it, vm.today) }
+private fun CaresTab(vm: MainViewModel, treatments: List<Treatment>, done: Set<String>, closed: Boolean) {
+    // A closed follow-up has nothing ongoing, even for the doses of today the closing left in the plan.
+    val (finished, active) = treatments.partition { closed || Schedule.isFinished(it, vm.today) }
     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (treatments.isEmpty()) {
             item { EmptyState("💊", stringResource(R.string.no_cares), stringResource(R.string.no_cares_text)) }
         }
         if (active.isNotEmpty()) item { SectionTitle(stringResource(R.string.ongoing)) }
-        items(active.sortedBy { it.startDate }, key = { it.id }) { TreatmentCard(vm, it, done) }
+        items(active.sortedBy { it.startDate }, key = { it.id }) { TreatmentCard(vm, it, done, closed) }
         if (finished.isNotEmpty()) item { SectionTitle(stringResource(R.string.finished)) }
-        items(finished.sortedByDescending { it.startDate }, key = { it.id }) { TreatmentCard(vm, it, done) }
+        items(finished.sortedByDescending { it.startDate }, key = { it.id }) { TreatmentCard(vm, it, done, closed) }
     }
 }
 
 @Composable
-private fun TreatmentCard(vm: MainViewModel, t: Treatment, done: Set<String>) {
+private fun TreatmentCard(vm: MainViewModel, t: Treatment, done: Set<String>, closed: Boolean) {
     val progress = Schedule.progress(t, done, vm.today)
     val last = Schedule.lastDay(t)
     Card(
@@ -199,7 +273,7 @@ private fun TreatmentCard(vm: MainViewModel, t: Treatment, done: Set<String>) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            if (missed > 0 && !Schedule.isFinished(t, vm.today)) {
+            if (missed > 0 && !closed && !Schedule.isFinished(t, vm.today)) {
                 Text(
                     stringResource(R.string.not_validated, missed),
                     style = MaterialTheme.typography.labelMedium,

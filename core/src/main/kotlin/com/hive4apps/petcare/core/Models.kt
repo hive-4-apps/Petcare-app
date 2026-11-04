@@ -16,6 +16,8 @@ data class Pet(
     val species: Species,
     val photoPath: String? = null,
     val createdAt: Long = 0,
+    /** Follow-up closed by the user (ISO date): no more reminders, shown apart; null while followed. */
+    val closedOn: String? = null,
 )
 
 /**
@@ -68,4 +70,15 @@ data class AppData(
     /** Minutes before a dose when the reminder rings (0 = on time). */
     val reminderAdvanceMinutes: Int = 0,
     val version: Int = 1,
-)
+) {
+    /** Treatments still followed on [day]: those of pets whose follow-up was not closed on or before it. */
+    fun treatmentsFollowedOn(day: java.time.LocalDate): List<Treatment> {
+        val closed = pets.mapNotNull { p -> p.closedOn?.let { p.id to it } }.toMap()
+        if (closed.isEmpty()) return treatments
+        return treatments.filter { t ->
+            val on = closed[t.petId] ?: return@filter true
+            val closedDay = runCatching { java.time.LocalDate.parse(on) }.getOrNull() ?: return@filter false
+            day < closedDay
+        }
+    }
+}

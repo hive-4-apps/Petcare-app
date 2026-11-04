@@ -3,6 +3,7 @@ package com.hive4apps.petcare.data
 import android.content.Context
 import com.hive4apps.petcare.core.AppData
 import com.hive4apps.petcare.core.Pet
+import com.hive4apps.petcare.core.Schedule
 import com.hive4apps.petcare.core.Treatment
 import com.hive4apps.petcare.core.VetDocument
 import com.hive4apps.petcare.reminders.Reminders
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.time.LocalDate
 import java.util.UUID
 
 /**
@@ -50,11 +52,61 @@ class Store private constructor(private val context: Context) {
         )
     }
 
+    /**
+     * Closes the pet's follow-up on [today]: no more reminders from now on, every ongoing care stops from
+     * tomorrow (doses already given stay in the history) and the pet is shown with the closed follow-ups.
+     */
+    fun closeFollowUp(petId: String, today: LocalDate) = update { d ->
+        val stop = today.plusDays(1).toString()
+        d.copy(
+            pets = d.pets.map { if (it.id == petId) it.copy(closedOn = today.toString()) else it },
+            treatments = d.treatments.map { t ->
+                if (t.petId == petId && !Schedule.isFinished(t, today) && (t.stoppedOn == null || t.stoppedOn > stop)) {
+                    t.copy(stoppedOn = stop)
+                } else {
+                    t
+                }
+            },
+        )
+    }
+
+    /** Reopens a closed follow-up: the cares stopped by the closing go on again. */
+    fun reopenFollowUp(petId: String) = update { d ->
+        val pet = d.pets.find { it.id == petId } ?: return@update d
+        val closedOn = pet.closedOn?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return@update d
+        val stoppedByClosing = closedOn.plusDays(1).toString()
+        d.copy(
+            pets = d.pets.map { if (it.id == petId) it.copy(closedOn = null) else it },
+            treatments = d.treatments.map { t ->
+                if (t.petId == petId && t.stoppedOn == stoppedByClosing) t.copy(stoppedOn = null) else t
+            },
+        )
+    }
+
+    /**
+     * Deletes the pet's follow-up but keeps the pet: every care, its history and the documents go, so a new
+     * follow-up can be started from scratch.
+     */
+    fun deleteFollowUp(petId: String) = update { d ->
+        val treatmentIds = d.treatments.filter { it.petId == petId }.map { it.id }.toSet()
+        d.documents.filter { it.petId == petId }.forEach { doc -> doc.imagePaths.forEach { File(it).delete() } }
+        d.copy(
+            pets = d.pets.map { if (it.id == petId) it.copy(closedOn = null) else it },
+            treatments = d.treatments.filterNot { it.petId == petId },
+            documents = d.documents.filterNot { it.petId == petId },
+            done = d.done.filterKeys { key -> key.substringBefore('|') !in treatmentIds },
+        )
+    }
+
     // ---- Treatments ----
 
+    /** A new care for a pet whose follow-up was closed reopens it (the old cares stay stopped). */
     fun saveTreatments(treatments: List<Treatment>, document: VetDocument?) = update { d ->
         val ids = treatments.map { it.id }.toSet()
+        val existing = d.treatments.map { it.id }.toSet()
+        val reopened = treatments.filter { it.id !in existing }.map { it.petId }.toSet()
         d.copy(
+            pets = if (reopened.isEmpty()) d.pets else d.pets.map { if (it.id in reopened) it.copy(closedOn = null) else it },
             treatments = d.treatments.filterNot { it.id in ids } + treatments,
             documents = if (document != null) d.documents.filterNot { it.id == document.id } + document else d.documents,
         )

@@ -60,7 +60,7 @@ fun TodayScreen(vm: MainViewModel, onOpenSettings: () -> Unit) {
     val data by vm.data.collectAsState()
     var dayOffset by rememberSaveable { mutableStateOf(0L) }
     val day = vm.today.plusDays(dayOffset)
-    val doses = Schedule.dayPlan(data.treatments, day)
+    val doses = Schedule.dayPlan(data.treatmentsFollowedOn(day), day)
     val done = doses.count { it.key in data.done }
     val pets = data.pets.associateBy { it.id }
     var sharing by rememberSaveable { mutableStateOf(false) }
