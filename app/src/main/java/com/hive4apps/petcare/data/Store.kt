@@ -61,7 +61,7 @@ class Store private constructor(private val context: Context) {
         d.copy(
             pets = d.pets.map { if (it.id == petId) it.copy(closedOn = today.toString()) else it },
             treatments = d.treatments.map { t ->
-                if (t.petId == petId && !Schedule.isFinished(t, today) && (t.stoppedOn == null || t.stoppedOn > stop)) {
+                if (t.petId == petId && !Schedule.isFinished(t, today) && (t.stoppedOn?.let { it > stop } ?: true)) {
                     t.copy(stoppedOn = stop)
                 } else {
                     t
