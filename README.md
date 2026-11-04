@@ -88,7 +88,7 @@ secrets du dépôt et jamais dans le code :
 
 (GitHub → *Settings* → *Secrets and variables* → *Actions* → *New repository secret*.)
 Sans ces secrets, la CI compile mais ne publie pas d'APK. Empreinte SHA-256 du certificat :
-`DE:64:B7:85:2B:E4:9E:93:BD:0F:33:C1:B1:11:04:41:B3:93:73:BA:FA:1E:75:72:B7:C1:53:07:FC:8D:62:7E`.
+`4A:51:23:FF:09:47:52:C7:C3:67:4F:2D:D3:17:91:19:A6:D4:30:0F:3D:0E:63:50:95:A1:09:FE:6F:0A:FB:BE`.
 
 En local, un fichier `keystore.properties` (ignoré par git) à la racine suffit :
 
