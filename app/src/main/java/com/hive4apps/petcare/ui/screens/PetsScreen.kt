@@ -1,5 +1,6 @@
 package com.hive4apps.petcare.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,12 +8,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -31,6 +35,7 @@ import com.hive4apps.petcare.R
 import com.hive4apps.petcare.core.Schedule
 import com.hive4apps.petcare.ui.MainViewModel
 import com.hive4apps.petcare.ui.Screen
+import java.time.LocalDate
 
 @Composable
 fun PetsScreen(vm: MainViewModel) {
@@ -50,7 +55,8 @@ fun PetsScreen(vm: MainViewModel) {
                 }
             }
         }
-        items(data.pets, key = { it.id }) { pet ->
+        val (closed, followed) = data.pets.partition { it.closedOn != null }
+        items(followed, key = { it.id }) { pet ->
             val treatments = data.treatments.filter { it.petId == pet.id }
             val active = treatments.count { !Schedule.isFinished(it, vm.today) }
             val todayDoses = Schedule.dayPlan(treatments, vm.today)
@@ -74,6 +80,36 @@ fun PetsScreen(vm: MainViewModel) {
                                 stringResource(R.string.today_progress, doneToday, todayDoses.size),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+                }
+            }
+        }
+        if (closed.isNotEmpty()) {
+            item { SectionTitle(stringResource(R.string.closed_follow_ups)) }
+        }
+        items(closed.sortedByDescending { it.closedOn }, key = { it.id }) { pet ->
+            val closedOn = pet.closedOn?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            Card(
+                onClick = { vm.open(Screen.PetDetail(pet.id)) },
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+            ) {
+                Row(Modifier.padding(16.dp).alpha(0.7f), verticalAlignment = Alignment.CenterVertically) {
+                    PetAvatar(pet, size = 44.dp)
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(pet.name, style = MaterialTheme.typography.titleMedium)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Outlined.TaskAlt, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                closedOn?.let { stringResource(R.string.follow_up_closed_on, shortDate(it)) }
+                                    ?: stringResource(R.string.closed_follow_ups),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }

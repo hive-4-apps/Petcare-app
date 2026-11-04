@@ -129,6 +129,15 @@
         <item quantity="other">%1$d soins en cours</item>
     </plurals>
     <string name="today_progress">Aujourd\'hui : %1$d/%2$d faits</string>
+    <string name="close_follow_up">Clôturer le suivi</string>
+    <string name="close_follow_up_title">Clôturer le suivi de %1$s ?</string>
+    <string name="close_follow_up_text">Les soins en cours s\'arrêtent et plus aucun rappel ne sonnera pour %1$s. L\'historique et les documents sont conservés, et le suivi peut être rouvert.</string>
+    <string name="reopen_follow_up">Rouvrir le suivi</string>
+    <string name="follow_up_closed_on">Suivi clôturé le %1$s</string>
+    <string name="closed_follow_ups">Suivis clôturés</string>
+    <string name="delete_follow_up">Supprimer le suivi</string>
+    <string name="delete_follow_up_title">Supprimer le suivi de %1$s ?</string>
+    <string name="delete_follow_up_text">Tous les soins, l\'historique des prises et les ordonnances de %1$s seront effacés. %1$s reste dans vos animaux pour commencer un nouveau suivi.</string>
     <string name="scan_prescription">Ordonnance</string>
     <string name="tab_cares">Soins</string>
     <string name="tab_plan">Plan complet</string>
