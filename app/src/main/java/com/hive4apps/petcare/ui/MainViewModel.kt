@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hive4apps.petcare.core.ExistingCare
+import com.hive4apps.petcare.core.ParsedCare
 import com.hive4apps.petcare.core.Pet
 import com.hive4apps.petcare.core.PrescriptionParser
 import com.hive4apps.petcare.core.Schedule
@@ -118,7 +119,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val ai = if (key == null) {
                 null
             } else {
-                val existing = f.petId?.let { id -> data.value.treatments.filter { it.petId == id } }.orEmpty()
+                val existing = petTreatments(f)
                 runCatching { AiReader.read(key, f.pages.toList(), existing.map { it.describe() }) }
                     .onFailure {
                         CrashLog.record(getApplication(), "readDocument AI", it)
@@ -131,10 +132,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 val (reading, existing) = ai
                 f.text = reading.transcription
                 f.drafts.clear()
-                f.drafts += reading.cares.map { care ->
-                    val old = existing.find { it.id == care.continuesId }
-                    if (old != null) Draft.continuing(care, old, now) else Draft.fromParsed(care, now)
-                }
+                f.drafts += draftsFrom(reading.cares, existing, now)
                 f.readByAi = true
                 f.step = NewCareFlow.Step.REVIEW
             } else {
@@ -142,7 +140,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     .onSuccess { text ->
                         f.text = text
                         f.drafts.clear()
-                        f.drafts += PrescriptionParser.parse(text).map { Draft.fromParsed(it, now) }
+                        f.drafts += draftsFrom(PrescriptionParser.parse(text), petTreatments(f), now)
                         f.step = NewCareFlow.Step.REVIEW
                     }
                     .onFailure {
@@ -152,6 +150,30 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             }
             f.reading = false
         }
+    }
+
+    /**
+     * Text of the document read elsewhere and pasted (Google Lens, a chat app...): free, and handwriting included
+     * when that tool reads it. Understood offline, like the phone's own reading.
+     */
+    fun readPastedText(text: String) {
+        val f = flow ?: return
+        f.error = null
+        f.aiError = null
+        f.readByAi = false
+        f.text = text.trim()
+        f.drafts.clear()
+        f.drafts += draftsFrom(PrescriptionParser.parse(f.text), petTreatments(f), LocalDateTime.now())
+        f.step = NewCareFlow.Step.REVIEW
+    }
+
+    private fun petTreatments(f: NewCareFlow): List<Treatment> =
+        f.petId?.let { id -> data.value.treatments.filter { it.petId == id } }.orEmpty()
+
+    /** "Manter..." lines continue the pet's treatment they name (the AI's match first, else by name or kind). */
+    private fun draftsFrom(cares: List<ParsedCare>, existing: List<Treatment>, now: LocalDateTime): List<Draft> = cares.map { care ->
+        val old = existing.find { it.id == care.continuesId } ?: PrescriptionParser.continuedTreatment(care, existing)
+        if (old != null) Draft.continuing(care, old, now) else Draft.fromParsed(care, now)
     }
 
     /** How a treatment already followed is shown to the AI, so it can match "Manter..." lines with it. */

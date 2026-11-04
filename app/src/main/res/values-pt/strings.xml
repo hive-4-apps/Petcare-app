@@ -215,4 +215,8 @@
     <string name="ai_key">Chave de API da Anthropic</string>
     <string name="ai_save_key">Ativar</string>
     <string name="ai_get_key">Obter uma chave</string>
+    <!-- Pasted text (Google Lens...) -->
+    <string name="paste_text">Colar o texto da receita</string>
+    <string name="paste_text_help">Grátis, para a letra à mão: abra a foto no Google Lens (ou num app de IA gratuito como Claude ou Gemini), escolha \u201cTexto\u201d, copie tudo e cole aqui. O PetCare encontra os cuidados no próprio celular.</string>
+    <string name="paste_text_label">Texto da receita</string>
 </resources>

@@ -5,7 +5,7 @@ Application Android (français / português do Brasil) pour suivre les traitemen
 1. **Nouveau suivi** : choisir un animal déjà enregistré ou en créer un (nom, chien ou chat).
 2. **Photo des documents du vétérinaire** (une photo par page, ou depuis la galerie). Le texte est lu
    **sur le téléphone** (ML Kit, hors ligne) : rien n'est envoyé sur Internet. Cette lecture comprend le texte
-   imprimé, pas l'écriture à la main : voir **Lecture par IA** ci-dessous.
+   imprimé, pas l'écriture à la main : voir **Écriture à la main** ci-dessous.
 3. PetCare retrouve chaque **médicament, shampooing, collyre, pommade…** avec la dose, la fréquence et la
    durée, puis affiche un écran de **vérification** : tout est modifiable, ce qui n'a pas été trouvé sur
    l'ordonnance est signalé « À vérifier ».
@@ -32,7 +32,17 @@ Application Android (français / português do Brasil) pour suivre les traitemen
 Un traitement commencé le soir se termine le matin après le dernier jour : le nombre total de prises est
 toujours respecté (ex. 2 fois par jour pendant 7 jours = 14 prises).
 
-## Lecture par IA (écriture manuscrite)
+## Écriture à la main
+
+Deux façons, au choix :
+
+- **Gratuit : « Coller le texte de l'ordonnance »** (étape photo). Ouvrir la photo dans Google Lens (ou une appli
+  d'IA gratuite), copier le texte, le coller : PetCare retrouve les soins hors ligne, comme pour une photo. Les
+  lignes « *Manter banhos 15/15 dias* » / « *Maintenir…* » continuent le soin déjà suivi qui a un mot du même nom,
+  sinon le dernier soin du même type (bain, lotion…).
+- **Automatique, payant : lecture par IA** (ci-dessous).
+
+### Lecture par IA
 
 Option dans **Réglages → Lecture par IA** : avec une clé API Anthropic (à créer sur
 [platform.claude.com](https://platform.claude.com/settings/keys), facturée sur ce compte, quelques centimes par

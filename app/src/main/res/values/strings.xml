@@ -215,4 +215,8 @@
     <string name="ai_key">Clé API Anthropic</string>
     <string name="ai_save_key">Activer</string>
     <string name="ai_get_key">Obtenir une clé</string>
+    <!-- Pasted text (Google Lens...) -->
+    <string name="paste_text">Coller le texte de l\'ordonnance</string>
+    <string name="paste_text_help">Gratuit, pour l\'écriture à la main : ouvrez la photo dans Google Lens (ou une appli d\'IA gratuite comme Claude ou Gemini), choisissez « Texte », copiez tout, puis collez ici. PetCare retrouve les soins sur le téléphone.</string>
+    <string name="paste_text_label">Texte de l\'ordonnance</string>
 </resources>
