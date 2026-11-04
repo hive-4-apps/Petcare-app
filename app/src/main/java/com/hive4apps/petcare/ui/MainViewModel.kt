@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.hive4apps.petcare.core.AiProvider
 import com.hive4apps.petcare.core.ExistingCare
 import com.hive4apps.petcare.core.ParsedCare
 import com.hive4apps.petcare.core.Pet
@@ -97,13 +98,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         open(Screen.NewCare)
     }
 
-    /** Anthropic API key entered in Settings: when set, documents are read by the AI (handwriting included). */
-    var aiKeySet by mutableStateOf(AiReader.apiKey(app) != null)
+    /** AI of the API key entered in Settings (Claude or Gemini): documents are then read by it, handwriting included. */
+    var aiProvider by mutableStateOf(AiReader.apiKey(app)?.let(AiProvider::forKey))
         private set
+    val aiKeySet: Boolean get() = aiProvider != null
 
     fun setAiKey(key: String?) {
         AiReader.setApiKey(getApplication(), key)
-        aiKeySet = AiReader.apiKey(getApplication()) != null
+        aiProvider = AiReader.apiKey(getApplication())?.let(AiProvider::forKey)
     }
 
     fun readDocument() {

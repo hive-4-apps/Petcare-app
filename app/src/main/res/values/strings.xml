@@ -203,20 +203,22 @@
     <string name="copied">Texte copié</string>
     <string name="whatsapp_missing">WhatsApp n\'est pas installé : choisissez une autre application.</string>
     <!-- AI reading (Claude) -->
-    <string name="read_by_ai">Lu par l\'IA (Claude), écriture manuscrite comprise. Vérifiez chaque soin avant de valider.</string>
+    <string name="read_by_ai">Lu par l\'IA (%1$s), écriture manuscrite comprise. Vérifiez chaque soin avant de valider.</string>
     <string name="ai_failed">Lecture par l\'IA impossible (%1$s) : lecture sur le téléphone utilisée, l\'écriture manuscrite n\'a peut-être pas été lue.</string>
     <string name="continues_care">Continue « %1$s »</string>
     <string name="handwritten">Manuscrit</string>
     <string name="ai_reading">Lecture par IA</string>
-    <string name="ai_reading_text">Sans connexion, le téléphone lit le texte imprimé mais pas l\'écriture à la main. Avec une clé API Anthropic, les ordonnances sont lues par l\'IA Claude : écriture manuscrite comprise, et les « Manter… / Maintenir… » sont reliés aux soins déjà suivis. Les photos sont alors envoyées à Anthropic pour la lecture (quelques centimes par ordonnance, facturés sur votre compte Anthropic). La clé reste sur ce téléphone.</string>
-    <string name="ai_on">Lecture par IA activée</string>
+    <string name="ai_reading_text">Sans connexion, le téléphone lit le texte imprimé mais pas l\'écriture à la main. Avec une clé API, les ordonnances sont lues par une IA, écriture manuscrite comprise, et les « Manter… / Maintenir… » sont reliés aux soins déjà suivis. Les photos sont alors envoyées pour la lecture. Clé Gemini (Google AI Studio) : gratuite dans une limite d\'utilisation, mais Google peut se servir des photos pour améliorer ses modèles. Clé Claude (Anthropic) : quelques centimes par ordonnance. La clé reste sur ce téléphone.</string>
+    <string name="ai_on">Lecture par IA activée (%1$s)</string>
     <string name="ai_on_text">Les photos des ordonnances sont envoyées à Claude (Anthropic) pour être lues. Sans réseau, le téléphone les lit lui-même.</string>
     <string name="ai_remove_key">Retirer la clé</string>
-    <string name="ai_key">Clé API Anthropic</string>
+    <string name="ai_key">Clé API (Gemini ou Claude)</string>
     <string name="ai_save_key">Activer</string>
-    <string name="ai_get_key">Obtenir une clé</string>
+    <string name="ai_get_key">Clé Claude (payante)</string>
     <!-- Pasted text (Google Lens...) -->
     <string name="paste_text">Coller le texte de l\'ordonnance</string>
     <string name="paste_text_help">Gratuit, pour l\'écriture à la main : ouvrez la photo dans Google Lens (ou une appli d\'IA gratuite comme Claude ou Gemini), choisissez « Texte », copiez tout, puis collez ici. PetCare retrouve les soins sur le téléphone.</string>
     <string name="paste_text_label">Texte de l\'ordonnance</string>
+    <string name="ai_on_text_gemini">Les photos des ordonnances sont envoyées à Gemini (Google) pour être lues : gratuit dans la limite de l\'offre gratuite, et Google peut s\'en servir pour améliorer ses modèles. Sans réseau, le téléphone les lit lui-même.</string>
+    <string name="ai_get_key_gemini">Clé Gemini gratuite</string>
 </resources>

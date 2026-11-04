@@ -47,6 +47,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.hive4apps.petcare.BuildConfig
 import com.hive4apps.petcare.R
+import com.hive4apps.petcare.core.AiProvider
 import com.hive4apps.petcare.core.CareKind
 import com.hive4apps.petcare.core.Dose
 import com.hive4apps.petcare.core.Treatment
@@ -133,8 +134,10 @@ fun SettingsScreen(vm: MainViewModel) {
             StatusCard(
                 icon = Icons.Outlined.AutoAwesome,
                 ok = true,
-                title = stringResource(R.string.ai_on),
-                text = stringResource(R.string.ai_on_text),
+                title = stringResource(R.string.ai_on, vm.aiProvider?.label.orEmpty()),
+                text = stringResource(
+                    if (vm.aiProvider == AiProvider.GEMINI) R.string.ai_on_text_gemini else R.string.ai_on_text,
+                ),
                 action = stringResource(R.string.ai_remove_key),
                 onAction = { vm.setAiKey(null) },
             )
@@ -144,17 +147,18 @@ fun SettingsScreen(vm: MainViewModel) {
                 value = key,
                 onValueChange = { key = it.trim() },
                 label = { Text(stringResource(R.string.ai_key)) },
-                placeholder = { Text("sk-ant-…") },
+                placeholder = { Text("AIza… / sk-ant-…") },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(onClick = { vm.setAiKey(key) }, enabled = key.length > 20) { Text(stringResource(R.string.ai_save_key)) }
-                TextButton(onClick = {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://platform.claude.com/settings/keys")))
-                }) { Text(stringResource(R.string.ai_get_key)) }
-            }
+            OutlinedButton(onClick = { vm.setAiKey(key) }, enabled = key.length > 20) { Text(stringResource(R.string.ai_save_key)) }
+            TextButton(onClick = {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://aistudio.google.com/apikey")))
+            }) { Text(stringResource(R.string.ai_get_key_gemini)) }
+            TextButton(onClick = {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://platform.claude.com/settings/keys")))
+            }) { Text(stringResource(R.string.ai_get_key)) }
         }
 
         SectionTitle(stringResource(R.string.backup))

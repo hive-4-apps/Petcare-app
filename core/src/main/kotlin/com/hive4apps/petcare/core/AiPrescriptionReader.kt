@@ -29,37 +29,72 @@ data class AiReading(val transcription: String, val cares: List<ParsedCare>)
 
 class AiReadingException(message: String) : Exception(message)
 
+/** Which AI reads, told by the key itself: Anthropic keys start with "sk-ant-", Google AI Studio keys with "AIza". */
+enum class AiProvider(val label: String) {
+    CLAUDE("Claude"), GEMINI("Gemini");
+
+    companion object {
+        fun forKey(key: String): AiProvider = if (key.trim().startsWith("AIza")) GEMINI else CLAUDE
+    }
+}
+
 /**
- * Reads photos of a vet's prescription with Claude (Anthropic API), printed and **handwritten** text alike,
+ * Reads photos of a vet's prescription with Claude (Anthropic API) or Gemini (Google AI Studio, free tier),
+ * printed and **handwritten** text alike,
  * and returns the same [ParsedCare] items as the offline [PrescriptionParser].
  *
  * Plain HTTP + kotlinx.serialization on purpose: the official Java SDK weighs ~40 MB, too much for the APK.
- * The photos are sent to Anthropic only when the user has entered their own API key.
+ * The photos are sent to Anthropic or Google only when the user has entered their own API key.
  */
 object AiPrescriptionReader {
     const val MODEL = "claude-opus-5-5"
     private const val URL_MESSAGES = "https://api.anthropic.com/v1/messages"
     private val json = Json { ignoreUnknownKeys = true }
 
+    /** Gemini model for free AI Studio keys: the "latest" alias follows Google's current Flash model. */
+    const val GEMINI_MODEL = "gemini-flash-latest"
+    private const val URL_GEMINI = "https://generativelanguage.googleapis.com/v1beta/models/$GEMINI_MODEL:generateContent"
+
     fun read(apiKey: String, pages: List<PageImage>, existing: List<ExistingCare>, timeoutMs: Int = 180_000): AiReading {
         require(pages.isNotEmpty()) { "no page" }
-        val connection = (URL(URL_MESSAGES).openConnection() as HttpURLConnection).apply {
+        val key = apiKey.trim()
+        return when (AiProvider.forKey(key)) {
+            AiProvider.CLAUDE -> parseResponse(
+                post(
+                    URL_MESSAGES,
+                    mapOf(
+                        "x-api-key" to key,
+                        "anthropic-version" to "2026-10-21",
+                        "anthropic-beta" to "server-side-fallback-2026-07-01",
+                    ),
+                    buildRequest(pages, existing),
+                    timeoutMs,
+                ),
+                existing,
+            )
+            AiProvider.GEMINI -> parseGeminiResponse(
+                post(URL_GEMINI, mapOf("x-goog-api-key" to key), buildGeminiRequest(pages, existing), timeoutMs),
+                existing,
+            )
+        }
+    }
+
+    private fun post(url: String, headers: Map<String, String>, body: String, timeoutMs: Int): String {
+        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
             connectTimeout = 20_000
             readTimeout = timeoutMs
             setRequestProperty("content-type", "application/json")
-            setRequestProperty("x-api-key", apiKey.trim())
-            setRequestProperty("anthropic-version", "2026-10-21")
-            setRequestProperty("anthropic-beta", "server-side-fallback-2026-07-01")
+            headers.forEach { (k, v) -> setRequestProperty(k, v) }
         }
         try {
-            connection.outputStream.use { it.write(buildRequest(pages, existing).toByteArray()) }
+            connection.outputStream.use { it.write(body.toByteArray()) }
             val code = connection.responseCode
-            val body = (if (code in 200..299) connection.inputStream else connection.errorStream)
+            val answer = (if (code in 200..299) connection.inputStream else connection.errorStream)
                 ?.use { it.readBytes().decodeToString() }.orEmpty()
-            if (code !in 200..299) throw AiReadingException(errorMessage(code, body))
-            return parseResponse(body, existing)
+            if (code !in 200..299) throw AiReadingException(errorMessage(code, answer))
+            return answer
         } finally {
             connection.disconnect()
         }
@@ -107,6 +142,74 @@ object AiPrescriptionReader {
             )
         }
     }.toString()
+
+    fun buildGeminiRequest(pages: List<PageImage>, existing: List<ExistingCare>): String = buildJsonObject {
+        putJsonObject("systemInstruction") {
+            putJsonArray("parts") { add(buildJsonObject { put("text", SYSTEM) }) }
+        }
+        putJsonArray("contents") {
+            add(
+                buildJsonObject {
+                    put("role", "user")
+                    putJsonArray("parts") {
+                        pages.forEach { page ->
+                            add(
+                                buildJsonObject {
+                                    putJsonObject("inline_data") {
+                                        put("mime_type", "image/jpeg")
+                                        put("data", page.base64Jpeg)
+                                    }
+                                },
+                            )
+                        }
+                        add(buildJsonObject { put("text", userText(pages.size, existing)) })
+                    }
+                },
+            )
+        }
+        putJsonObject("generationConfig") {
+            put("responseMimeType", "application/json")
+            put("responseSchema", GEMINI_SCHEMA)
+            put("maxOutputTokens", 16000)
+        }
+    }.toString()
+
+    /** Same shape as [SCHEMA], in the OpenAPI subset Gemini takes (nullable instead of anyOf). */
+    private val GEMINI_SCHEMA: JsonObject by lazy { geminiSchema() }
+
+    private fun geminiSchema(): JsonObject = buildJsonObject {
+        fun field(type: String, nullable: Boolean = false, values: List<String>? = null) = buildJsonObject {
+            put("type", type)
+            if (nullable) put("nullable", true)
+            if (values != null) putJsonArray("enum") { values.forEach { add(JsonPrimitive(it)) } }
+        }
+        put("type", "OBJECT")
+        putJsonArray("required") { add(JsonPrimitive("transcription")); add(JsonPrimitive("cares")) }
+        putJsonObject("properties") {
+            put("transcription", field("STRING"))
+            putJsonObject("cares") {
+                put("type", "ARRAY")
+                putJsonObject("items") {
+                    put("type", "OBJECT")
+                    putJsonArray("required") { ITEM_FIELDS.forEach { add(JsonPrimitive(it)) } }
+                    putJsonArray("propertyOrdering") { ITEM_FIELDS.forEach { add(JsonPrimitive(it)) } }
+                    putJsonObject("properties") {
+                        put("name", field("STRING"))
+                        put("kind", field("STRING", values = CareKind.entries.map { it.name }))
+                        put("dose", field("STRING", nullable = true))
+                        put("perDay", field("INTEGER", nullable = true))
+                        put("everyDays", field("INTEGER", nullable = true))
+                        put("durationDays", field("INTEGER", nullable = true))
+                        put("continuous", field("BOOLEAN"))
+                        put("timeHint", field("STRING", nullable = true, values = TimeHint.entries.map { it.name }))
+                        put("source", field("STRING"))
+                        put("handwritten", field("BOOLEAN"))
+                        put("continuesId", field("STRING", nullable = true))
+                    }
+                }
+            }
+        }
+    }
 
     private fun userText(pageCount: Int, existing: List<ExistingCare>): String = buildString {
         append(if (pageCount == 1) "Here is the photo of the vet's document." else "Here are the $pageCount pages of the vet's document, in order.")
@@ -213,6 +316,29 @@ object AiPrescriptionReader {
             .map { it.jsonObject }
             .filter { it["type"]?.jsonPrimitive?.contentOrNull == "text" }
             .joinToString("") { it["text"]?.jsonPrimitive?.contentOrNull.orEmpty() }
+        return parseResult(text, existing)
+    }
+
+    fun parseGeminiResponse(body: String, existing: List<ExistingCare>): AiReading {
+        val root = runCatching { json.parseToJsonElement(body).jsonObject }.getOrNull()
+            ?: throw AiReadingException("unexpected answer")
+        root["promptFeedback"]?.jsonObject?.get("blockReason")?.jsonPrimitive?.contentOrNull?.let {
+            throw AiReadingException("the AI declined to read this document ($it)")
+        }
+        val candidate = root["candidates"]?.jsonArray?.firstOrNull()?.jsonObject
+            ?: throw AiReadingException("unexpected answer")
+        when (val reason = candidate["finishReason"]?.jsonPrimitive?.contentOrNull) {
+            null, "STOP" -> Unit
+            "MAX_TOKENS" -> throw AiReadingException("document too long for the AI")
+            else -> throw AiReadingException("the AI stopped reading ($reason)")
+        }
+        val text = candidate["content"]?.jsonObject?.get("parts")?.jsonArray.orEmpty()
+            .mapNotNull { it.jsonObject["text"]?.jsonPrimitive?.contentOrNull }
+            .joinToString("")
+        return parseResult(text, existing)
+    }
+
+    private fun parseResult(text: String, existing: List<ExistingCare>): AiReading {
         val result = runCatching { json.parseToJsonElement(text).jsonObject }.getOrNull()
             ?: throw AiReadingException("unexpected answer")
         val ids = existing.map { it.id }.toSet()
@@ -250,7 +376,7 @@ object AiPrescriptionReader {
         }.getOrNull()
         return when (code) {
             401, 403 -> "API key refused ($code)"
-            429 -> "too many requests or no credit left (429)"
+            429 -> "too many requests, free quota or credit used up (429)"
             else -> "HTTP $code" + (message?.let { ": $it" } ?: "")
         }
     }

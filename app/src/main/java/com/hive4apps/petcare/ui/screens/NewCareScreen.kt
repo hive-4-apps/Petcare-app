@@ -316,7 +316,7 @@ private fun ReviewStep(vm: MainViewModel, flow: NewCareFlow) {
             if (flow.readByAi || flow.aiError != null) {
                 item {
                     Text(
-                        if (flow.readByAi) stringResource(R.string.read_by_ai) else stringResource(R.string.ai_failed, flow.aiError.orEmpty()),
+                        if (flow.readByAi) stringResource(R.string.read_by_ai, vm.aiProvider?.label ?: "IA") else stringResource(R.string.ai_failed, flow.aiError.orEmpty()),
                         style = MaterialTheme.typography.bodySmall,
                         color = if (flow.readByAi) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error,
                     )

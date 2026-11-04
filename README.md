@@ -40,13 +40,18 @@ Deux façons, au choix :
   d'IA gratuite), copier le texte, le coller : PetCare retrouve les soins hors ligne, comme pour une photo. Les
   lignes « *Manter banhos 15/15 dias* » / « *Maintenir…* » continuent le soin déjà suivi qui a un mot du même nom,
   sinon le dernier soin du même type (bain, lotion…).
-- **Automatique, payant : lecture par IA** (ci-dessous).
+- **Automatique : lecture par IA** (ci-dessous), gratuite avec une clé Gemini.
 
 ### Lecture par IA
 
-Option dans **Réglages → Lecture par IA** : avec une clé API Anthropic (à créer sur
-[platform.claude.com](https://platform.claude.com/settings/keys), facturée sur ce compte, quelques centimes par
-ordonnance), les photos sont lues par **Claude** (`claude-opus-5-5`) :
+Option dans **Réglages → Lecture par IA** : on colle une clé API, et l'application reconnaît l'IA à la clé.
+
+| Clé | Où la créer | Coût | Photos |
+| --- | --- | --- | --- |
+| **Gemini** (`AIza…`) | [aistudio.google.com/apikey](https://aistudio.google.com/apikey), avec un compte Google | gratuit dans la limite de l'offre gratuite | envoyées à Google, qui peut s'en servir pour améliorer ses modèles (offre gratuite) |
+| **Claude** (`sk-ant-…`) | [platform.claude.com](https://platform.claude.com/settings/keys) | crédits prépayés, quelques centimes par ordonnance | envoyées à Anthropic |
+
+Modèles : `gemini-flash-latest` (alias du dernier Gemini Flash) et `claude-opus-5-5`. Avec l'un ou l'autre :
 
 - le texte **manuscrit** est lu comme l'imprimé (ajouts à la main sous la signature, dans la marge…) ;
 - chaque soin revient directement avec sa dose, sa fréquence, sa durée et le type de soin ;
@@ -54,9 +59,9 @@ ordonnance), les photos sont lues par **Claude** (`claude-opus-5-5`) :
   continue (sans durée s'il n'en est pas donnée), à la date où la prochaine prise était prévue, et l'ancien
   s'arrête là ; l'écran de vérification affiche « Continue « … » » et « Manuscrit ».
 
-Les photos sont alors envoyées à Anthropic. Sans clé, sans réseau ou en cas d'erreur, l'application revient à la
-lecture hors ligne (le message d'erreur est affiché sur l'écran de vérification). La clé reste sur le téléphone
-(hors sauvegarde). Appel HTTP direct (`core/.../AiPrescriptionReader.kt`) : le SDK Java officiel pèse ~40 Mo.
+Sans clé, sans réseau, quota gratuit épuisé ou en cas d'erreur, l'application revient à la lecture hors ligne (le
+message d'erreur est affiché sur l'écran de vérification). La clé reste sur le téléphone (hors sauvegarde). Appels
+HTTP directs (`core/.../AiPrescriptionReader.kt`) : le SDK Java d'Anthropic pèse ~40 Mo.
 
 ## Installer sur le téléphone (adb)
 

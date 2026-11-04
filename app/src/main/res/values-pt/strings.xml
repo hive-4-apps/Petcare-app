@@ -203,20 +203,22 @@
     <string name="copied">Texto copiado</string>
     <string name="whatsapp_missing">O WhatsApp não está instalado: escolha outro app.</string>
     <!-- AI reading (Claude) -->
-    <string name="read_by_ai">Lido pela IA (Claude), incluindo a letra manuscrita. Confira cada cuidado antes de confirmar.</string>
+    <string name="read_by_ai">Lido pela IA (%1$s), incluindo a letra manuscrita. Confira cada cuidado antes de confirmar.</string>
     <string name="ai_failed">Não foi possível ler com a IA (%1$s): foi usada a leitura do celular, a letra manuscrita pode não ter sido lida.</string>
     <string name="continues_care">Continua \u201c%1$s\u201d</string>
     <string name="handwritten">Manuscrito</string>
     <string name="ai_reading">Leitura por IA</string>
-    <string name="ai_reading_text">Sem internet, o celular lê o texto impresso, mas não a letra à mão. Com uma chave de API da Anthropic, as receitas são lidas pela IA Claude: incluindo a letra manuscrita, e os \u201cManter…\u201d são ligados aos cuidados já acompanhados. As fotos são então enviadas à Anthropic para a leitura (alguns centavos por receita, cobrados na sua conta Anthropic). A chave fica neste celular.</string>
-    <string name="ai_on">Leitura por IA ativada</string>
+    <string name="ai_reading_text">Sem internet, o celular lê o texto impresso, mas não a letra à mão. Com uma chave de API, as receitas são lidas por uma IA, incluindo a letra manuscrita, e os \u201cManter…\u201d são ligados aos cuidados já acompanhados. As fotos são então enviadas para a leitura. Chave Gemini (Google AI Studio): grátis dentro de um limite de uso, mas o Google pode usar as fotos para melhorar os modelos dele. Chave Claude (Anthropic): alguns centavos por receita. A chave fica neste celular.</string>
+    <string name="ai_on">Leitura por IA ativada (%1$s)</string>
     <string name="ai_on_text">As fotos das receitas são enviadas ao Claude (Anthropic) para serem lidas. Sem internet, o próprio celular as lê.</string>
     <string name="ai_remove_key">Remover a chave</string>
-    <string name="ai_key">Chave de API da Anthropic</string>
+    <string name="ai_key">Chave de API (Gemini ou Claude)</string>
     <string name="ai_save_key">Ativar</string>
-    <string name="ai_get_key">Obter uma chave</string>
+    <string name="ai_get_key">Chave Claude (paga)</string>
     <!-- Pasted text (Google Lens...) -->
     <string name="paste_text">Colar o texto da receita</string>
     <string name="paste_text_help">Grátis, para a letra à mão: abra a foto no Google Lens (ou num app de IA gratuito como Claude ou Gemini), escolha \u201cTexto\u201d, copie tudo e cole aqui. O PetCare encontra os cuidados no próprio celular.</string>
     <string name="paste_text_label">Texto da receita</string>
+    <string name="ai_on_text_gemini">As fotos das receitas são enviadas ao Gemini (Google) para serem lidas: grátis dentro do limite da oferta gratuita, e o Google pode usá-las para melhorar os modelos dele. Sem internet, o próprio celular as lê.</string>
+    <string name="ai_get_key_gemini">Chave Gemini grátis</string>
 </resources>

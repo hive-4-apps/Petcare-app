@@ -88,4 +88,55 @@ class AiPrescriptionReaderTest {
         assertEquals(listOf("image", "image", "text"), content.map { it["type"]!!.jsonPrimitive.content })
         assertTrue(content[2]["text"]!!.jsonPrimitive.content.contains("bath-1: Shampoo Cloresten"))
     }
+
+    private fun geminiAnswer(cares: String, finish: String = "STOP"): String = buildJsonObject {
+        put(
+            "candidates",
+            buildJsonArray {
+                add(
+                    buildJsonObject {
+                        put("finishReason", finish)
+                        put(
+                            "content",
+                            buildJsonObject {
+                                put("role", "model")
+                                put(
+                                    "parts",
+                                    buildJsonArray {
+                                        add(buildJsonObject { put("text", """{"transcription":"*Manter banhos 15/15 dias","cares":$cares}""") })
+                                    },
+                                )
+                            },
+                        )
+                    },
+                )
+            },
+        )
+    }.toString()
+
+    @Test
+    fun geminiAnswersAreReadTheSameWay() {
+        val reading = AiPrescriptionReader.parseGeminiResponse(geminiAnswer(cares), existing)
+        assertEquals(listOf("Amoxicilina com clavulanato 500mg", "Banhos", "Loção nas lesões"), reading.cares.map { it.name })
+        assertEquals("bath-1", reading.cares[1].continuesId)
+        assertFailsWith<AiReadingException> { AiPrescriptionReader.parseGeminiResponse(geminiAnswer("[]", finish = "MAX_TOKENS"), existing) }
+        assertFailsWith<AiReadingException> { AiPrescriptionReader.parseGeminiResponse("""{"promptFeedback":{"blockReason":"SAFETY"}}""", existing) }
+    }
+
+    @Test
+    fun theKeyTellsWhichAiReads() {
+        assertEquals(AiProvider.GEMINI, AiProvider.forKey(" AIzaSyExample"))
+        assertEquals(AiProvider.CLAUDE, AiProvider.forKey("sk-ant-api03-example"))
+    }
+
+    @Test
+    fun geminiRequestSendsEveryPageWithASchema() {
+        val request = Json.parseToJsonElement(AiPrescriptionReader.buildGeminiRequest(listOf(PageImage("AAA")), existing)).jsonObject
+        val parts = request["contents"]!!.jsonArray[0].jsonObject["parts"]!!.jsonArray.map { it.jsonObject }
+        assertEquals("AAA", parts[0]["inline_data"]!!.jsonObject["data"]!!.jsonPrimitive.content)
+        assertTrue(parts[1]["text"]!!.jsonPrimitive.content.contains("bath-1"))
+        val config = request["generationConfig"]!!.jsonObject
+        assertEquals("application/json", config["responseMimeType"]!!.jsonPrimitive.content)
+        assertEquals("OBJECT", config["responseSchema"]!!.jsonObject["type"]!!.jsonPrimitive.content)
+    }
 }
