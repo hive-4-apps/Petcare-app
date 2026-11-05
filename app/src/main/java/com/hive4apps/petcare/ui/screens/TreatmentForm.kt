@@ -134,7 +134,7 @@ fun TreatmentForm(draft: Draft, onChange: (Draft) -> Unit, modifier: Modifier = 
                 onDismiss = { editingTime = null },
                 onPick = { picked ->
                     val newTimes = sorted.toMutableList().also { it[index] = picked.format(HH_MM) }.distinct().sorted()
-                    onChange(draft.copy(times = newTimes, startTime = null).startingFrom(LocalDateTime.now()))
+                    onChange(draft.copy(times = newTimes, startTime = draft.startTime?.takeIf { it in newTimes }))
                     editingTime = null
                 },
             )
@@ -199,7 +199,8 @@ fun TreatmentForm(draft: Draft, onChange: (Draft) -> Unit, modifier: Modifier = 
                 initial = draft.startDate,
                 onDismiss = { pickingDate = false },
                 onPick = {
-                    onChange(draft.copy(startDate = it, startTime = null).startingFrom(LocalDateTime.now()))
+                    // A date chosen by the user is kept, even today or in the past (a course already started).
+                    onChange(draft.startingOn(it, LocalDateTime.now()))
                     pickingDate = false
                 },
             )
@@ -216,6 +217,21 @@ fun TreatmentForm(draft: Draft, onChange: (Draft) -> Unit, modifier: Modifier = 
                         label = { Text(time) },
                     )
                 }
+            }
+        }
+
+        val past = draft.pastDoses(LocalDateTime.now())
+        if (past.isNotEmpty()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(pluralStringResource(R.plurals.past_doses_given, past.size, past.size), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(if (draft.markPastGiven) R.string.past_doses_marked else R.string.past_doses_unmarked),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(checked = draft.markPastGiven, onCheckedChange = { onChange(draft.copy(markPastGiven = it)) })
             }
         }
 

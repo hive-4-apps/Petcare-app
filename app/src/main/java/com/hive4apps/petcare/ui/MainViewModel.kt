@@ -210,7 +210,9 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             val old = data.value.treatments.find { it.id == draft.continuesId } ?: return@mapNotNull null
             if (old.stoppedOn != null || Schedule.isFinished(old, today)) null else old.copy(stoppedOn = draft.startDate.toString())
         }
-        store.saveTreatments(continued + treatments, document)
+        val now = LocalDateTime.now()
+        val given = kept.fold(emptyMap<String, Long>()) { acc, d -> acc + d.alreadyGiven(petId, now) }
+        store.saveTreatments(continued + treatments, document, alreadyGiven = given)
         f.saved = true
         flow = null
         backStack.clear()
