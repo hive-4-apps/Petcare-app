@@ -1,6 +1,7 @@
 package com.hive4apps.petcare.ui
 
 import com.hive4apps.petcare.core.CareKind
+import com.hive4apps.petcare.core.Dose
 import com.hive4apps.petcare.core.HH_MM
 import com.hive4apps.petcare.core.ParsedCare
 import com.hive4apps.petcare.core.Schedule
@@ -10,6 +11,7 @@ import com.hive4apps.petcare.core.parseTime
 import com.hive4apps.petcare.data.Store
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 /** A treatment being checked or edited. [guessed] lists what was not found in the document (to check). */
 data class Draft(
@@ -33,6 +35,8 @@ data class Draft(
     /** Keeps going this treatment already followed ("Manter..."): it is stopped where this one starts. */
     val continuesId: String? = null,
     val continuesName: String? = null,
+    /** Started before it was entered: the doses already behind are marked as given when saved. */
+    val markPastGiven: Boolean = true,
 ) {
     enum class Field { FREQUENCY, DURATION, DOSE }
 
@@ -51,12 +55,38 @@ data class Draft(
         documentId = documentId ?: this.documentId,
     )
 
+    /** Doses of this plan already behind [now] (a course started before it was entered in the app). */
+    fun pastDoses(now: LocalDateTime): List<Dose> {
+        if (name.isBlank() || startDate > now.toLocalDate()) return emptyList()
+        return Schedule.doses(toTreatment("", null), startDate, now.toLocalDate()).filter { it.at <= now.minusMinutes(GRACE_MINUTES) }
+    }
+
+    /** The doses to record as given when saving (dose key -> time of the dose), if the user says so. */
+    fun alreadyGiven(petId: String, now: LocalDateTime): Map<String, Long> {
+        if (!markPastGiven) return emptyMap()
+        return Schedule.doses(toTreatment(petId, null), startDate, now.toLocalDate())
+            .filter { it.at <= now.minusMinutes(GRACE_MINUTES) }
+            .associate { it.key to it.at.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() }
+    }
+
+    /**
+     * A start date chosen by the user, kept as is even when it is today or already past (a course started before
+     * it was entered). Today, the first dose is the next time to come or, when every time is behind, the last one.
+     */
+    fun startingOn(day: LocalDate, now: LocalDateTime): Draft {
+        if (day != now.toLocalDate()) return copy(startDate = day, startTime = null)
+        val sorted = times.sorted()
+        val limit = now.toLocalTime().minusMinutes(GRACE_MINUTES)
+        val first = sorted.firstOrNull { (parseTime(it) ?: return@firstOrNull false) >= limit } ?: sorted.lastOrNull()
+        return copy(startDate = day, startTime = first?.takeIf { it != sorted.first() })
+    }
+
     /** Starting today: the first dose is the next time to come, not one already past. */
     fun startingFrom(now: LocalDateTime): Draft {
         if (startDate != now.toLocalDate()) return copy(startTime = null)
         val sorted = times.sorted()
         // 30 minutes of grace: a dose of 08:00 read at 08:20 is still for now.
-        val next = sorted.firstOrNull { (parseTime(it) ?: return@firstOrNull false) >= now.toLocalTime().minusMinutes(30) }
+        val next = sorted.firstOrNull { (parseTime(it) ?: return@firstOrNull false) >= now.toLocalTime().minusMinutes(GRACE_MINUTES) }
         return when {
             next == null -> copy(startDate = startDate.plusDays(1), startTime = null)
             next == sorted.first() -> copy(startTime = null)
@@ -65,6 +95,9 @@ data class Draft(
     }
 
     companion object {
+        /** A dose up to 30 minutes late is still "to give now", not one already behind. */
+        const val GRACE_MINUTES = 30L
+
         fun fromParsed(p: ParsedCare, now: LocalDateTime): Draft {
             val guessed = buildSet {
                 if (p.perDay == null && p.everyDays == null) add(Field.FREQUENCY)
@@ -131,6 +164,8 @@ data class Draft(
             startTime = t.startTime,
             notes = t.notes,
             documentId = t.documentId,
+            // Editing a care: doses left unchecked stay as they were unless the user asks.
+            markPastGiven = false,
         )
     }
 }

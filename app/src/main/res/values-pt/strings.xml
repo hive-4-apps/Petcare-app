@@ -96,6 +96,12 @@
     <string name="continuous">uso contínuo</string>
     <string name="field_start">Início</string>
     <string name="first_dose">Primeira dose no primeiro dia:</string>
+    <plurals name="past_doses_given">
+        <item quantity="one">%1$d dose já passou: já foi dada?</item>
+        <item quantity="other">%1$d doses já passaram: já foram dadas?</item>
+    </plurals>
+    <string name="past_doses_marked">Serão marcadas como feitas.</string>
+    <string name="past_doses_unmarked">Ficarão para validar (em vermelho se esquecidas).</string>
     <string name="field_notes">Observações</string>
     <string name="field_notes_hint">ex. junto com a comida, deixar agir 10 min</string>
     <string name="see_document">Ver a receita</string>

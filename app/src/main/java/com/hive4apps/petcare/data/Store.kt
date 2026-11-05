@@ -101,11 +101,17 @@ class Store private constructor(private val context: Context) {
     // ---- Treatments ----
 
     /** A new care for a pet whose follow-up was closed reopens it (the old cares stay stopped). */
-    fun saveTreatments(treatments: List<Treatment>, document: VetDocument?) = update { d ->
+    fun saveTreatments(
+        treatments: List<Treatment>,
+        document: VetDocument?,
+        /** Doses already given before the care was entered (dose key -> when given). */
+        alreadyGiven: Map<String, Long> = emptyMap(),
+    ) = update { d ->
         val ids = treatments.map { it.id }.toSet()
         val existing = d.treatments.map { it.id }.toSet()
         val reopened = treatments.filter { it.id !in existing }.map { it.petId }.toSet()
         d.copy(
+            done = d.done + alreadyGiven.filterKeys { it !in d.done },
             pets = if (reopened.isEmpty()) d.pets else d.pets.map { if (it.id in reopened) it.copy(closedOn = null) else it },
             treatments = d.treatments.filterNot { it.id in ids } + treatments,
             documents = if (document != null) d.documents.filterNot { it.id == document.id } + document else d.documents,

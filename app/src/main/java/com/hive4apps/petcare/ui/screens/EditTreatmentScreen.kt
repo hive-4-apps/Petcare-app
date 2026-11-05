@@ -86,7 +86,11 @@ fun EditTreatmentScreen(vm: MainViewModel, treatmentId: String?, petId: String) 
         }
         Button(
             onClick = {
-                vm.store.saveTreatments(listOf(draft.toTreatment(petId, existing?.documentId).copy(stoppedOn = existing?.stoppedOn)), null)
+                vm.store.saveTreatments(
+                    listOf(draft.toTreatment(petId, existing?.documentId).copy(stoppedOn = existing?.stoppedOn)),
+                    null,
+                    alreadyGiven = draft.alreadyGiven(petId, LocalDateTime.now()),
+                )
                 vm.back()
             },
             enabled = draft.name.isNotBlank() && draft.times.isNotEmpty(),
