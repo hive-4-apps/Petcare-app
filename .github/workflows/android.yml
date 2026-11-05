@@ -50,7 +50,8 @@ jobs:
 
       # Direct download link for the phone: Releases -> "PetCare (dernière version)" -> petcare.apk
       - name: Publish APK to the "petcare-latest" release
-        if: github.event_name != 'pull_request' && env.PETCARE_KEYSTORE_BASE64 != ''
+        # Only the main branch publishes: a work branch (open PR) must not replace the APK people install.
+        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch && env.PETCARE_KEYSTORE_BASE64 != ''
         run: |
           cp app/build/outputs/apk/release/app-release.apk petcare.apk
           git tag -f petcare-latest
@@ -59,12 +60,15 @@ jobs:
             gh release create petcare-latest --title "PetCare (dernière version)" \
               --notes "APK à installer : adb install -r petcare.apk (garde les données)."
           gh release upload petcare-latest petcare.apk --clobber
+          # The version and date in the release text: easy to see on the phone that the APK is the new one.
+          gh release edit petcare-latest --notes "Version 1.0.$(( GITHUB_RUN_NUMBER + 100 )) ($(echo $GITHUB_SHA | cut -c1-7)), publiée le $(TZ=America/Sao_Paulo date '+%d/%m/%Y à %H:%M'). APK à installer par-dessus l'application : les données sont gardées."
         env:
           GH_TOKEN: ${{ github.token }}
 
       # Keep the latest APK on an orphan branch so it can be fetched with plain git.
       - name: Publish APK to the "apk-build" branch
-        if: github.event_name != 'pull_request' && env.PETCARE_KEYSTORE_BASE64 != ''
+        # Only the main branch publishes: a work branch (open PR) must not replace the APK people install.
+        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch && env.PETCARE_KEYSTORE_BASE64 != ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
