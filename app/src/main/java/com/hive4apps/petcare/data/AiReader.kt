@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
 import com.hive4apps.petcare.core.AiPrescriptionReader
+import com.hive4apps.petcare.core.AiProvider
 import com.hive4apps.petcare.core.AiReading
 import com.hive4apps.petcare.core.ExistingCare
 import com.hive4apps.petcare.core.PageImage
@@ -33,7 +34,7 @@ object AiReader {
 
     fun setApiKey(context: Context, key: String?) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().apply {
-            if (key.isNullOrBlank()) remove(KEY) else putString(KEY, key.trim())
+            if (key.isNullOrBlank()) remove(KEY) else putString(KEY, AiProvider.cleanKey(key))
         }.apply()
     }
 

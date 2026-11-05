@@ -29,12 +29,18 @@ data class AiReading(val transcription: String, val cares: List<ParsedCare>)
 
 class AiReadingException(message: String) : Exception(message)
 
-/** Which AI reads, told by the key itself: Anthropic keys start with "sk-ant-", Google AI Studio keys with "AIza". */
+/**
+ * Which AI reads, told by the key itself: Anthropic keys always start with "sk-ant-"; any other key is a Google
+ * AI Studio key (their format changes: "AIza..." and newer ones), so it goes to Gemini.
+ */
 enum class AiProvider(val label: String) {
     CLAUDE("Claude"), GEMINI("Gemini");
 
     companion object {
-        fun forKey(key: String): AiProvider = if (key.trim().startsWith("AIza")) GEMINI else CLAUDE
+        fun forKey(key: String): AiProvider = if (cleanKey(key).startsWith("sk-ant-")) CLAUDE else GEMINI
+
+        /** A pasted key without what copy-paste may add: spaces, line breaks, quotes, invisible characters. */
+        fun cleanKey(key: String): String = key.filter { it.code in 33..126 && it != '"' && it != '\'' }
     }
 }
 
@@ -57,7 +63,7 @@ object AiPrescriptionReader {
 
     fun read(apiKey: String, pages: List<PageImage>, existing: List<ExistingCare>, timeoutMs: Int = 180_000): AiReading {
         require(pages.isNotEmpty()) { "no page" }
-        val key = apiKey.trim()
+        val key = AiProvider.cleanKey(apiKey)
         return when (AiProvider.forKey(key)) {
             AiProvider.CLAUDE -> parseResponse(
                 post(
