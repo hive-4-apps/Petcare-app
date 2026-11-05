@@ -127,6 +127,11 @@ class AiPrescriptionReaderTest {
     fun theKeyTellsWhichAiReads() {
         assertEquals(AiProvider.GEMINI, AiProvider.forKey(" AIzaSyExample"))
         assertEquals(AiProvider.CLAUDE, AiProvider.forKey("sk-ant-api03-example"))
+        // Google keys don't all start with "AIza": anything that is not an Anthropic key goes to Gemini.
+        assertEquals(AiProvider.GEMINI, AiProvider.forKey("AQ.Ab8RN6Kexample-KQzg"))
+        // What copy-paste adds (line break, invisible space, quotes) is not part of the key.
+        assertEquals(AiProvider.CLAUDE, AiProvider.forKey("\u200B\"sk-ant-api03-example\"\n"))
+        assertEquals("AIzaSyExample", AiProvider.cleanKey(" AIzaSy\u200BExample\n"))
     }
 
     @Test
