@@ -1,4 +1,6 @@
-# PetCare
+# Noami Pets
+
+*Anciennement « PetCare » : le nom affiché a changé, l'identifiant Android `com.hive4apps.petcare` reste le même pour que l'application se mette à jour par-dessus l'ancienne en gardant les données.*
 
 Application Android (français / português do Brasil) pour suivre les traitements de son chien ou de son chat.
 
@@ -6,7 +8,7 @@ Application Android (français / português do Brasil) pour suivre les traitemen
 2. **Photo des documents du vétérinaire** (une photo par page, ou depuis la galerie). Le texte est lu
    **sur le téléphone** (ML Kit, hors ligne) : rien n'est envoyé sur Internet. Cette lecture comprend le texte
    imprimé, pas l'écriture à la main : voir **Écriture à la main** ci-dessous.
-3. PetCare retrouve chaque **médicament, shampooing, collyre, pommade…** avec la dose, la fréquence et la
+3. Noami Pets retrouve chaque **médicament, shampooing, collyre, pommade…** avec la dose, la fréquence et la
    durée, puis affiche un écran de **vérification** : tout est modifiable, ce qui n'a pas été trouvé sur
    l'ordonnance est signalé « À vérifier ».
 4. Le **plan de soins** est créé :
@@ -37,7 +39,7 @@ toujours respecté (ex. 2 fois par jour pendant 7 jours = 14 prises).
 Deux façons, au choix :
 
 - **Gratuit : « Coller le texte de l'ordonnance »** (étape photo). Ouvrir la photo dans Google Lens (ou une appli
-  d'IA gratuite), copier le texte, le coller : PetCare retrouve les soins hors ligne, comme pour une photo. Les
+  d'IA gratuite), copier le texte, le coller : Noami Pets retrouve les soins hors ligne, comme pour une photo. Les
   lignes « *Manter banhos 15/15 dias* » / « *Maintenir…* » continuent le soin déjà suivi qui a un mot du même nom,
   sinon le dernier soin du même type (bain, lotion…).
 - **Automatique : lecture par IA** (ci-dessous), gratuite avec une clé Gemini.
@@ -68,14 +70,14 @@ HTTP directs (`core/.../AiPrescriptionReader.kt`) : le SDK Java d'Anthropic pès
 Avec [Platform Tools](https://developer.android.com/tools/releases/platform-tools) et le débogage USB activé :
 
 ```
-adb install -r petcare.apk
+adb install -r noami-pets.apk
 ```
 
 `-r` remplace la version installée **en gardant les données** (animaux, soins, historique, photos).
 À la première ouverture, autoriser les notifications pour recevoir les rappels.
 
 Chaque push sur GitHub lance le workflow **Android** : tests, compilation, APK signé publié sur la branche
-`apk-build` (`petcare.apk`) et dans la release « PetCare (dernière version) ».
+`apk-build` (`noami-pets.apk`) et dans la release « Noami Pets (dernière version) ».
 
 ### Signature (mises à jour sans perte de données)
 
@@ -85,6 +87,9 @@ secrets du dépôt et jamais dans le code :
 
 - `PETCARE_KEYSTORE_BASE64` : le fichier `petcare.jks` encodé en base64 ;
 - `PETCARE_KEYSTORE_PASSWORD` : son mot de passe (alias `petcare`).
+
+Ces noms (secrets, fichier `petcare.jks`, alias) datent de l'époque PetCare et restent tels quels : la clé ne
+change pas avec le nouveau nom.
 
 (GitHub → *Settings* → *Secrets and variables* → *Actions* → *New repository secret*.)
 Sans ces secrets, la CI compile mais ne publie pas d'APK. Empreinte SHA-256 du certificat :
@@ -101,7 +106,7 @@ puis `./gradlew :app:assembleRelease` → `app/build/outputs/apk/release/app-rel
 
 ## Données
 
-Tout reste sur le téléphone (`petcare.json` + photos dans le stockage privé de l'app), conservé lors des
+Tout reste sur le téléphone (`petcare.json`, nom gardé depuis PetCare, + photos dans le stockage privé de l'app), conservé lors des
 mises à jour et inclus dans la sauvegarde Google du téléphone. *Réglages → Sauvegarde* permet aussi
 d'exporter / restaurer un fichier (sans les photos).
 
@@ -113,5 +118,5 @@ d'exporter / restaurer un fichier (sans les photos).
   (alarmes exactes, redémarrage, boutons des notifications). `./gradlew :app:testDebugUnitTest` lance l'app
   sous Robolectric et parcourt un suivi complet.
 
-PetCare aide à suivre un traitement ; il ne remplace pas l'avis du vétérinaire. Vérifiez toujours le plan
+Noami Pets aide à suivre un traitement ; il ne remplace pas l'avis du vétérinaire. Vérifiez toujours le plan
 avec l'ordonnance.
