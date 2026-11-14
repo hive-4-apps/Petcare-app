@@ -118,7 +118,7 @@ object Reminders {
         if (!canNotify(context)) return
         val data = Store.get(context).data.value
         val pet = data.pets.find { it.id == dose.treatment.petId }
-        val emoji = if (pet?.species == Species.CAT) "🐱" else "🐶"
+        val emoji = (pet?.species ?: Species.OTHER).emoji
         val title = context.getString(kindAction(dose.treatment.kind), pet?.name.orEmpty(), dose.treatment.name)
         val parts = listOfNotNull(
             dose.treatment.dose.takeIf { it.isNotBlank() },

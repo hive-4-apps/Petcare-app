@@ -26,6 +26,11 @@ class Store private constructor(private val context: Context) {
 
     val docsDir: File get() = File(context.filesDir, "docs").apply { mkdirs() }
 
+    /** Photos of the pets (each one replaced, never kept twice). */
+    val petPhotosDir: File get() = File(context.filesDir, "pets").apply { mkdirs() }
+
+    fun newPetPhotoFile(petId: String): File = File(petPhotosDir, "${petId}_${System.currentTimeMillis()}.jpg")
+
     @Synchronized
     fun update(transform: (AppData) -> AppData) {
         val next = transform(_data.value)
@@ -39,14 +44,20 @@ class Store private constructor(private val context: Context) {
 
     fun addPet(pet: Pet) = update { it.copy(pets = it.pets + pet) }
 
-    fun updatePet(pet: Pet) = update { d -> d.copy(pets = d.pets.map { if (it.id == pet.id) pet else it }) }
+    /** A photo replaced or removed: the old file goes. */
+    fun updatePet(pet: Pet) = update { d ->
+        d.pets.find { it.id == pet.id }?.photoPath?.takeIf { it != pet.photoPath }?.let { File(it).delete() }
+        d.copy(pets = d.pets.map { if (it.id == pet.id) pet else it })
+    }
 
     fun deletePet(petId: String) = update { d ->
-        val treatmentIds = d.treatments.filter { it.petId == petId }.map { it.id }.toSet()
+        val treatmentIds = (d.treatments + d.history).filter { it.petId == petId }.map { it.id }.toSet()
         d.documents.filter { it.petId == petId }.forEach { doc -> doc.imagePaths.forEach { File(it).delete() } }
+        d.pets.find { it.id == petId }?.photoPath?.let { File(it).delete() }
         d.copy(
             pets = d.pets.filterNot { it.id == petId },
             treatments = d.treatments.filterNot { it.petId == petId },
+            history = d.history.filterNot { it.petId == petId },
             documents = d.documents.filterNot { it.petId == petId },
             done = d.done.filterKeys { key -> key.substringBefore('|') !in treatmentIds },
         )
@@ -84,18 +95,40 @@ class Store private constructor(private val context: Context) {
     }
 
     /**
-     * Deletes the pet's follow-up but keeps the pet: every care, its history and the documents go, so a new
-     * follow-up can be started from scratch.
+     * Starts the pet's follow-up again from scratch but keeps its history: every care leaves the follow-up
+     * (ongoing ones stop from tomorrow) and moves to the history with the doses given. The prescriptions stay
+     * in the pet's documents.
      */
-    fun deleteFollowUp(petId: String) = update { d ->
-        val treatmentIds = d.treatments.filter { it.petId == petId }.map { it.id }.toSet()
-        d.documents.filter { it.petId == petId }.forEach { doc -> doc.imagePaths.forEach { File(it).delete() } }
+    fun deleteFollowUp(petId: String, today: LocalDate) = update { d ->
+        val (removed, kept) = d.treatments.partition { it.petId == petId }
         d.copy(
             pets = d.pets.map { if (it.id == petId) it.copy(closedOn = null) else it },
-            treatments = d.treatments.filterNot { it.petId == petId },
-            documents = d.documents.filterNot { it.petId == petId },
-            done = d.done.filterKeys { key -> key.substringBefore('|') !in treatmentIds },
+            treatments = kept,
+            history = d.history + removed.map { it.archived(today) },
         )
+    }
+
+    /** Erases the pet's history for good: the cares removed from its follow-up and their doses. */
+    fun clearHistory(petId: String) = update { d ->
+        val ids = d.history.filter { it.petId == petId }.map { it.id }.toSet()
+        d.copy(
+            history = d.history.filterNot { it.id in ids },
+            done = d.done.filterKeys { it.substringBefore('|') !in ids },
+        )
+    }
+
+    /** Erases one care of the history for good, with its doses. */
+    fun deleteFromHistory(id: String) = update { d ->
+        d.copy(
+            history = d.history.filterNot { it.id == id },
+            done = d.done.filterKeys { it.substringBefore('|') != id },
+        )
+    }
+
+    private fun Treatment.archived(today: LocalDate): Treatment {
+        val stop = today.plusDays(1).toString()
+        val stopped = if (!Schedule.isFinished(this, today) && (stoppedOn?.let { it > stop } ?: true)) copy(stoppedOn = stop) else this
+        return stopped.copy(archivedOn = today.toString())
     }
 
     // ---- Treatments ----
@@ -118,11 +151,21 @@ class Store private constructor(private val context: Context) {
         )
     }
 
-    fun deleteTreatment(id: String) = update { d ->
-        d.copy(
-            treatments = d.treatments.filterNot { it.id == id },
-            done = d.done.filterKeys { it.substringBefore('|') != id },
-        )
+    /**
+     * Deletes a care. Once a dose of it was given, it goes to the pet's history (with those doses) instead of
+     * vanishing; a care never given (entered by mistake) is erased.
+     */
+    fun deleteTreatment(id: String, today: LocalDate) = update { d ->
+        val t = d.treatments.find { it.id == id } ?: return@update d
+        val given = d.done.keys.any { it.substringBefore('|') == id }
+        if (given) {
+            d.copy(treatments = d.treatments.filterNot { it.id == id }, history = d.history + t.archived(today))
+        } else {
+            d.copy(
+                treatments = d.treatments.filterNot { it.id == id },
+                done = d.done.filterKeys { it.substringBefore('|') != id },
+            )
+        }
     }
 
     fun deleteDocument(id: String) = update { d ->
@@ -152,6 +195,7 @@ class Store private constructor(private val context: Context) {
         val imported = json.decodeFromString(AppData.serializer(), text)
         update {
             imported.copy(
+                pets = imported.pets.map { p -> if (p.photoPath?.let { !File(it).exists() } == true) p.copy(photoPath = null) else p },
                 documents = imported.documents.map { doc -> doc.copy(imagePaths = doc.imagePaths.filter { File(it).exists() }) },
             )
         }

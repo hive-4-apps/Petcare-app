@@ -59,24 +59,59 @@ class FollowUpClosingTest {
     }
 
     @Test
-    fun deleteTheFollowUpKeepsThePet() {
+    fun deleteTheFollowUpKeepsThePetAndItsHistory() {
         store.addPet(Pet("p", "Rex", Species.DOG))
         store.addPet(Pet("q", "Minou", Species.CAT))
         store.saveTreatments(
             listOf(
-                Treatment("a", "p", "Apoquel", startDate = today.toString()),
+                Treatment("a", "p", "Apoquel", durationDays = null, startDate = today.minusDays(2).toString()),
                 Treatment("m", "q", "Metacam", startDate = today.toString()),
             ),
             null,
         )
-        store.setDone("a|$today|08:00", true)
+        store.setDone("a|${today.minusDays(1)}|08:00", true)
         store.closeFollowUp("p", today)
 
-        store.deleteFollowUp("p")
-        val data = store.data.value
+        store.deleteFollowUp("p", today)
+        var data = store.data.value
         assertEquals(listOf("p", "q"), data.pets.map { it.id })
         assertNull(data.pets.first { it.id == "p" }.closedOn)
+        // Out of the follow-up (no plan, no reminder)...
         assertEquals(listOf("m"), data.treatments.map { it.id })
+        // ...but in the history, with the dose given.
+        val archived = data.history.single()
+        assertEquals("a", archived.id)
+        assertEquals(today.toString(), archived.archivedOn)
+        assertEquals(setOf("a|${today.minusDays(1)}|08:00"), data.done.keys)
+
+        store.clearHistory("p")
+        data = store.data.value
+        assertEquals(emptyList<Treatment>(), data.history)
         assertEquals(emptySet<String>(), data.done.keys)
+    }
+
+    @Test
+    fun deletingACareKeepsItsGivenDosesInTheHistory() {
+        store.addPet(Pet("p", "Rex", Species.DOG))
+        store.saveTreatments(
+            listOf(
+                Treatment("a", "p", "Apoquel", startDate = today.minusDays(1).toString()),
+                Treatment("typo", "p", "Apocuel", startDate = today.toString()),
+            ),
+            null,
+        )
+        store.setDone("a|${today.minusDays(1)}|08:00", true)
+
+        store.deleteTreatment("a", today)
+        store.deleteTreatment("typo", today)
+        val data = store.data.value
+        assertEquals(emptyList<Treatment>(), data.treatments)
+        // Given at least once: kept in the history. Never given (entered by mistake): erased.
+        assertEquals(listOf("a"), data.history.map { it.id })
+        assertEquals(setOf("a|${today.minusDays(1)}|08:00"), data.done.keys)
+
+        store.deleteFromHistory("a")
+        assertEquals(emptyList<Treatment>(), store.data.value.history)
+        assertEquals(emptySet<String>(), store.data.value.done.keys)
     }
 }

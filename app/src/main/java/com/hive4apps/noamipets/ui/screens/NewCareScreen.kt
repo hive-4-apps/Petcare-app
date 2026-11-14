@@ -41,7 +41,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -134,20 +133,7 @@ private fun ChoosePetStep(vm: MainViewModel, flow: NewCareFlow) {
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(stringResource(R.string.new_pet), style = MaterialTheme.typography.titleMedium)
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Species.entries.forEach { species ->
-                                FilterChip(
-                                    selected = flow.newPetSpecies == species,
-                                    onClick = { flow.newPetSpecies = species },
-                                    label = {
-                                        Text(
-                                            speciesEmoji(species) + "  " +
-                                                stringResource(if (species == Species.DOG) R.string.dog else R.string.cat),
-                                        )
-                                    },
-                                )
-                            }
-                        }
+                        SpeciesPicker(flow.newPetSpecies, onSelect = { flow.newPetSpecies = it })
                         OutlinedTextField(
                             value = flow.newPetName,
                             onValueChange = { flow.newPetName = it },

@@ -2,8 +2,22 @@ package com.hive4apps.noamipets.core
 
 import kotlinx.serialization.Serializable
 
+/** The pets most kept in Brazil (dogs and cats first, then birds, small mammals, reptiles and fish). */
 @Serializable
-enum class Species { DOG, CAT }
+enum class Species(val emoji: String) {
+    DOG("🐶"),
+    CAT("🐱"),
+    BIRD("🦜"),
+    RABBIT("🐰"),
+    HAMSTER("🐹"),
+    GUINEA_PIG("🐹"),
+    CHINCHILLA("🐭"),
+    TURTLE("🐢"),
+    LIZARD("🦎"),
+    SNAKE("🐍"),
+    FISH("🐠"),
+    OTHER("🐾"),
+}
 
 /** What is given: decides the icon and the words of the reminder ("give", "apply", "bath"...). */
 @Serializable
@@ -14,6 +28,7 @@ data class Pet(
     val id: String,
     val name: String,
     val species: Species,
+    /** Photo of the pet, in the app's private storage (pets/). */
     val photoPath: String? = null,
     val createdAt: Long = 0,
     /** Follow-up closed by the user (ISO date): no more reminders, shown apart; null while followed. */
@@ -48,6 +63,8 @@ data class Treatment(
     val documentId: String? = null,
     /** Stopped by the user before the end (ISO date, no dose from that day on). */
     val stoppedOn: String? = null,
+    /** Removed from the follow-up (ISO date): only kept in [AppData.history], with the doses given. */
+    val archivedOn: String? = null,
 )
 
 /** Photos of a vet document and the text read from them. */
@@ -65,6 +82,11 @@ data class AppData(
     val pets: List<Pet> = emptyList(),
     val treatments: List<Treatment> = emptyList(),
     val documents: List<VetDocument> = emptyList(),
+    /**
+     * Cares taken out of the follow-up (deleted after doses were given, or follow-up started again from
+     * scratch): no reminder, no plan, but their doses stay in [done] and show in the pet's history.
+     */
+    val history: List<Treatment> = emptyList(),
     /** Dose key -> when it was validated (epoch millis). */
     val done: Map<String, Long> = emptyMap(),
     /** Minutes before a dose when the reminder rings (0 = on time). */

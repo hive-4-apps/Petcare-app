@@ -16,6 +16,20 @@
 
     <string name="dog">Cachorro</string>
     <string name="cat">Gato</string>
+    <string name="species_bird">Ave</string>
+    <string name="species_rabbit">Coelho</string>
+    <string name="species_hamster">Hamster</string>
+    <string name="species_guinea_pig">Porquinho-da-índia</string>
+    <string name="species_chinchilla">Chinchila</string>
+    <string name="species_turtle">Tartaruga / jabuti</string>
+    <string name="species_lizard">Lagarto</string>
+    <string name="species_snake">Cobra</string>
+    <string name="species_fish">Peixe</string>
+    <string name="species_other">Outro</string>
+    <string name="pet_photo">Foto do animal</string>
+    <string name="pet_photo_camera">Foto</string>
+    <string name="pet_photo_gallery">Galeria</string>
+    <string name="pet_photo_remove">Remover a foto</string>
 
     <!-- Today -->
     <string name="today">Hoje</string>
@@ -109,7 +123,7 @@
     <string name="stop_treatment_text">Nenhum lembrete deste cuidado a partir de amanhã. O histórico é mantido.</string>
     <string name="resume_treatment">Retomar o tratamento</string>
     <string name="delete_care_title">Excluir “%1$s”?</string>
-    <string name="delete_care_text">O cuidado e o histórico de doses serão apagados.</string>
+    <string name="delete_care_text">O cuidado sai do acompanhamento. As doses já dadas ficam no histórico do animal.</string>
     <plurals name="times_per_day">
         <item quantity="one">%1$dx ao dia</item>
         <item quantity="other">%1$dx ao dia</item>
@@ -143,7 +157,7 @@
     <string name="closed_follow_ups">Acompanhamentos encerrados</string>
     <string name="delete_follow_up">Excluir o acompanhamento</string>
     <string name="delete_follow_up_title">Excluir o acompanhamento de %1$s?</string>
-    <string name="delete_follow_up_text">Todos os cuidados, o histórico das doses e as receitas de %1$s serão apagados. %1$s continua nos seus animais para começar um novo acompanhamento.</string>
+    <string name="delete_follow_up_text">Todos os cuidados de %1$s param e saem do acompanhamento, para começar um novo. O histórico das doses e as receitas são mantidos (aba Histórico).</string>
     <string name="scan_prescription">Receita</string>
     <string name="tab_cares">Cuidados</string>
     <string name="tab_plan">Plano completo</string>
@@ -236,4 +250,23 @@
     <string name="paste_text_label">Texto da receita</string>
     <string name="ai_on_text_gemini">As fotos das receitas são enviadas ao Gemini (Google) para serem lidas: grátis dentro do limite da oferta gratuita, e o Google pode usá-las para melhorar os modelos dele. Sem internet, o próprio celular as lê.</string>
     <string name="ai_get_key_gemini">Chave Gemini grátis</string>
+    <!-- Care history -->
+    <string name="tab_history">Histórico</string>
+    <string name="history_journal">Dia a dia</string>
+    <string name="history_by_care">Por cuidado</string>
+    <string name="history_since">Desde %1$s</string>
+    <string name="history_given_at">dado às %1$s</string>
+    <string name="history_given_on">dado em %1$s às %2$s</string>
+    <string name="history_not_given">não marcado</string>
+    <string name="history_removed_on">retirado do acompanhamento em %1$s</string>
+    <string name="history_past">Passados</string>
+    <string name="history_empty">Ainda sem histórico</string>
+    <string name="history_empty_text">As doses passadas, marcadas ou não, aparecerão aqui, dia após dia.</string>
+    <string name="share_history">Compartilhar o histórico</string>
+    <string name="share_history_title">Histórico dos cuidados de %1$s</string>
+    <string name="clear_history">Apagar o histórico</string>
+    <string name="clear_history_title">Apagar o histórico de %1$s?</string>
+    <string name="clear_history_text">Os cuidados retirados do acompanhamento e as suas doses serão apagados definitivamente. Os cuidados do acompanhamento atual não mudam.</string>
+    <string name="delete_from_history">Apagar do histórico</string>
+    <string name="delete_from_history_text">Este cuidado e as suas doses serão apagados definitivamente.</string>
 </resources>

@@ -16,6 +16,20 @@
 
     <string name="dog">Chien</string>
     <string name="cat">Chat</string>
+    <string name="species_bird">Oiseau</string>
+    <string name="species_rabbit">Lapin</string>
+    <string name="species_hamster">Hamster</string>
+    <string name="species_guinea_pig">Cochon d\'Inde</string>
+    <string name="species_chinchilla">Chinchilla</string>
+    <string name="species_turtle">Tortue</string>
+    <string name="species_lizard">Lézard</string>
+    <string name="species_snake">Serpent</string>
+    <string name="species_fish">Poisson</string>
+    <string name="species_other">Autre</string>
+    <string name="pet_photo">Photo de l\'animal</string>
+    <string name="pet_photo_camera">Photo</string>
+    <string name="pet_photo_gallery">Galerie</string>
+    <string name="pet_photo_remove">Retirer la photo</string>
 
     <!-- Today -->
     <string name="today">Aujourd\'hui</string>
@@ -109,7 +123,7 @@
     <string name="stop_treatment_text">Plus aucun rappel pour ce soin à partir de demain. L\'historique est conservé.</string>
     <string name="resume_treatment">Reprendre le traitement</string>
     <string name="delete_care_title">Supprimer « %1$s » ?</string>
-    <string name="delete_care_text">Le soin et l\'historique des prises seront effacés.</string>
+    <string name="delete_care_text">Le soin quitte le suivi. Les prises déjà données restent dans l\'historique de l\'animal.</string>
     <plurals name="times_per_day">
         <item quantity="one">%1$d fois par jour</item>
         <item quantity="other">%1$d fois par jour</item>
@@ -143,7 +157,7 @@
     <string name="closed_follow_ups">Suivis clôturés</string>
     <string name="delete_follow_up">Supprimer le suivi</string>
     <string name="delete_follow_up_title">Supprimer le suivi de %1$s ?</string>
-    <string name="delete_follow_up_text">Tous les soins, l\'historique des prises et les ordonnances de %1$s seront effacés. %1$s reste dans vos animaux pour commencer un nouveau suivi.</string>
+    <string name="delete_follow_up_text">Tous les soins de %1$s s\'arrêtent et quittent le suivi, pour en commencer un nouveau. L\'historique des prises et les ordonnances sont conservés (onglet Historique).</string>
     <string name="scan_prescription">Ordonnance</string>
     <string name="tab_cares">Soins</string>
     <string name="tab_plan">Plan complet</string>
@@ -236,4 +250,23 @@
     <string name="paste_text_label">Texte de l\'ordonnance</string>
     <string name="ai_on_text_gemini">Les photos des ordonnances sont envoyées à Gemini (Google) pour être lues : gratuit dans la limite de l\'offre gratuite, et Google peut s\'en servir pour améliorer ses modèles. Sans réseau, le téléphone les lit lui-même.</string>
     <string name="ai_get_key_gemini">Clé Gemini gratuite</string>
+    <!-- Care history -->
+    <string name="tab_history">Historique</string>
+    <string name="history_journal">Jour par jour</string>
+    <string name="history_by_care">Par soin</string>
+    <string name="history_since">Depuis le %1$s</string>
+    <string name="history_given_at">donné à %1$s</string>
+    <string name="history_given_on">donné le %1$s à %2$s</string>
+    <string name="history_not_given">non coché</string>
+    <string name="history_removed_on">retiré du suivi le %1$s</string>
+    <string name="history_past">Passés</string>
+    <string name="history_empty">Pas encore d\'historique</string>
+    <string name="history_empty_text">Les prises passées, cochées ou non, apparaîtront ici, jour après jour.</string>
+    <string name="share_history">Partager l\'historique</string>
+    <string name="share_history_title">Historique des soins de %1$s</string>
+    <string name="clear_history">Effacer l\'historique</string>
+    <string name="clear_history_title">Effacer l\'historique de %1$s ?</string>
+    <string name="clear_history_text">Les soins retirés du suivi et leurs prises seront effacés définitivement. Les soins du suivi en cours ne changent pas.</string>
+    <string name="delete_from_history">Effacer de l\'historique</string>
+    <string name="delete_from_history_text">Ce soin et ses prises seront effacés définitivement.</string>
 </resources>

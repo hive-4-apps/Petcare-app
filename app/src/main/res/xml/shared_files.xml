@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
     <files-path name="docs" path="docs/" />
+    <files-path name="pets" path="pets/" />
     <cache-path name="cache" path="." />
 </paths>

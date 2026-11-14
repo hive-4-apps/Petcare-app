@@ -87,7 +87,7 @@ fun copyText(context: Context, text: String) {
 }
 
 /** WhatsApp directly when installed, else the usual "share with" list. */
-fun shareText(context: Context, text: String, whatsApp: Boolean) {
+fun shareText(context: Context, text: String, whatsApp: Boolean, chooserTitle: Int = R.string.share_day) {
     val send = Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text)
     if (whatsApp) {
         for (pkg in listOf("com.whatsapp", "com.whatsapp.w4b")) {
@@ -99,16 +99,16 @@ fun shareText(context: Context, text: String, whatsApp: Boolean) {
         }
         Toast.makeText(context, R.string.whatsapp_missing, Toast.LENGTH_SHORT).show()
     }
-    context.startActivity(Intent.createChooser(send, context.getString(R.string.share_day)))
+    context.startActivity(Intent.createChooser(send, context.getString(chooserTitle)))
 }
 
 /** Preview of the day's text, with WhatsApp / other apps / copy. */
 @Composable
-fun ShareDayDialog(text: String, onDismiss: () -> Unit) {
+fun ShareDayDialog(text: String, onDismiss: () -> Unit, title: String = stringResource(R.string.share_day)) {
     val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.share_day)) },
+        title = { Text(title) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)) {
