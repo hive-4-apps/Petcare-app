@@ -1,6 +1,12 @@
 package com.hive4apps.noamipets.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,14 +19,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.TaskAlt
@@ -30,6 +42,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,8 +50,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -56,12 +69,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.hive4apps.noamipets.R
 import com.hive4apps.noamipets.core.Pet
 import com.hive4apps.noamipets.core.Schedule
-import com.hive4apps.noamipets.core.Species
 import com.hive4apps.noamipets.core.Treatment
+import com.hive4apps.noamipets.data.Store
 import com.hive4apps.noamipets.ui.MainViewModel
 import com.hive4apps.noamipets.ui.Screen
 import com.hive4apps.noamipets.ui.theme.DoneGreen
@@ -77,20 +91,23 @@ fun PetDetailScreen(vm: MainViewModel, petId: String) {
     val treatments = data.treatments.filter { it.petId == petId }
     var tab by rememberSaveable { mutableStateOf(0) }
     var menu by remember { mutableStateOf(false) }
-    var renaming by remember { mutableStateOf(false) }
+    var renaming by rememberSaveable { mutableStateOf(false) }
     var deleting by remember { mutableStateOf(false) }
     var closing by remember { mutableStateOf(false) }
     var deletingFollowUp by remember { mutableStateOf(false) }
+    var clearingHistory by remember { mutableStateOf(false) }
+    val hasHistory = data.history.any { it.petId == petId }
     val closedOn = pet.closedOn?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            PetAvatar(pet, size = 60.dp)
+            // Tap the avatar to change the photo (or the name, the kind).
+            Box(Modifier.clip(CircleShape).clickable { renaming = true }) { PetAvatar(pet, size = 60.dp) }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Text(pet.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
                 Text(
-                    stringResource(if (pet.species == Species.CAT) R.string.cat else R.string.dog),
+                    stringResource(speciesLabel(pet.species)),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -119,6 +136,13 @@ fun PetDetailScreen(vm: MainViewModel, petId: String) {
                         text = { Text(stringResource(R.string.delete_follow_up)) },
                         leadingIcon = { Icon(Icons.Outlined.DeleteSweep, null) },
                         onClick = { menu = false; deletingFollowUp = true },
+                    )
+                }
+                if (hasHistory) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.clear_history)) },
+                        leadingIcon = { Icon(Icons.Outlined.History, null) },
+                        onClick = { menu = false; clearingHistory = true },
                     )
                 }
                 DropdownMenuItem(
@@ -159,14 +183,15 @@ fun PetDetailScreen(vm: MainViewModel, petId: String) {
                 Text(stringResource(R.string.add_care), maxLines = 1)
             }
         }
-        TabRow(selectedTabIndex = tab, modifier = Modifier.padding(top = 12.dp)) {
-            listOf(R.string.tab_cares, R.string.tab_plan, R.string.tab_documents).forEachIndexed { i, label ->
+        ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp, modifier = Modifier.padding(top = 12.dp)) {
+            listOf(R.string.tab_cares, R.string.tab_plan, R.string.tab_history, R.string.tab_documents).forEachIndexed { i, label ->
                 Tab(selected = tab == i, onClick = { tab = i }, text = { Text(stringResource(label)) })
             }
         }
         when (tab) {
             0 -> CaresTab(vm, treatments, data.done.keys, closed = pet.closedOn != null)
             1 -> PlanTab(vm, pet, treatments, data.done)
+            2 -> HistoryTab(vm, pet, data)
             else -> DocumentsTab(vm, petId)
         }
     }
@@ -194,10 +219,24 @@ fun PetDetailScreen(vm: MainViewModel, petId: String) {
             confirmButton = {
                 TextButton(onClick = {
                     deletingFollowUp = false
-                    vm.store.deleteFollowUp(pet.id)
+                    vm.store.deleteFollowUp(pet.id, vm.today)
                 }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { deletingFollowUp = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
+    if (clearingHistory) {
+        AlertDialog(
+            onDismissRequest = { clearingHistory = false },
+            title = { Text(stringResource(R.string.clear_history_title, pet.name)) },
+            text = { Text(stringResource(R.string.clear_history_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    clearingHistory = false
+                    vm.store.clearHistory(pet.id)
+                }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { clearingHistory = false }) { Text(stringResource(R.string.cancel)) } },
         )
     }
     if (deleting) {
@@ -415,32 +454,82 @@ private fun DocumentsTab(vm: MainViewModel, petId: String) {
     }
 }
 
+/** Name, kind and photo of a pet. A photo taken here and then cancelled is not kept. */
 @Composable
 fun PetDialog(pet: Pet, onDismiss: () -> Unit, onSave: (Pet) -> Unit) {
-    var name by remember { mutableStateOf(pet.name) }
-    var species by remember { mutableStateOf(pet.species) }
+    val context = LocalContext.current
+    val store = remember { Store.get(context) }
+    // Saveable: the camera app may push the screen out of memory.
+    var name by rememberSaveable { mutableStateOf(pet.name) }
+    var species by rememberSaveable { mutableStateOf(pet.species) }
+    var photo by rememberSaveable { mutableStateOf(pet.photoPath) }
+    var pendingPhoto by rememberSaveable { mutableStateOf<String?>(null) }
+    /** Drops a photo taken in this dialog (never the one already saved). */
+    fun dropNew(path: String?) {
+        if (path != null && path != pet.photoPath) File(path).delete()
+    }
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        val file = pendingPhoto?.let(::File)
+        if (ok && file != null && file.length() > 0) {
+            dropNew(photo)
+            photo = file.path
+        } else {
+            file?.delete()
+        }
+        pendingPhoto = null
+    }
+    val gallery = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val file = store.newPetPhotoFile(pet.id)
+        runCatching {
+            context.contentResolver.openInputStream(uri)?.use { input -> file.outputStream().use { input.copyTo(it) } }
+        }
+        if (file.length() > 0) {
+            dropNew(photo)
+            photo = file.path
+        } else {
+            file.delete()
+        }
+    }
+    val cancel = {
+        dropNew(photo)
+        onDismiss()
+    }
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = cancel,
         title = { Text(stringResource(R.string.edit_pet)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Species.entries.forEach { s ->
-                        FilterChip(
-                            selected = species == s,
-                            onClick = { species = s },
-                            label = { Text(speciesEmoji(s) + "  " + stringResource(if (s == Species.DOG) R.string.dog else R.string.cat)) },
-                        )
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    PetAvatar(pet.copy(species = species, photoPath = photo), size = 72.dp)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            FilledTonalIconButton(onClick = {
+                                val file = store.newPetPhotoFile(pet.id)
+                                pendingPhoto = file.path
+                                camera.launch(FileProvider.getUriForFile(context, "${context.packageName}.files", file))
+                            }) { Icon(Icons.Outlined.CameraAlt, stringResource(R.string.pet_photo_camera)) }
+                            FilledTonalIconButton(onClick = {
+                                gallery.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            }) { Icon(Icons.Outlined.PhotoLibrary, stringResource(R.string.pet_photo_gallery)) }
+                        }
+                        if (photo != null) {
+                            TextButton(onClick = { dropNew(photo); photo = null }) { Text(stringResource(R.string.pet_photo_remove)) }
+                        } else {
+                            Text(stringResource(R.string.pet_photo), style = MaterialTheme.typography.bodySmall)
+                        }
                     }
                 }
+                SpeciesPicker(species, onSelect = { species = it })
                 OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.pet_name)) }, singleLine = true)
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(pet.copy(name = name.trim(), species = species)) }, enabled = name.isNotBlank()) {
+            TextButton(onClick = { onSave(pet.copy(name = name.trim(), species = species, photoPath = photo)) }, enabled = name.isNotBlank()) {
                 Text(stringResource(R.string.save))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = { TextButton(onClick = cancel) { Text(stringResource(R.string.cancel)) } },
     )
 }

@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +21,7 @@ import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Shower
 import androidx.compose.material.icons.outlined.Vaccines
 import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -36,11 +40,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.hive4apps.noamipets.R
 import com.hive4apps.noamipets.core.CareKind
 import com.hive4apps.noamipets.core.Pet
 import com.hive4apps.noamipets.core.Species
 import com.hive4apps.noamipets.core.Treatment
+import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -68,7 +74,37 @@ fun kindIcon(kind: CareKind): ImageVector = when (kind) {
     CareKind.OTHER -> Icons.Outlined.Pets
 }
 
-fun speciesEmoji(species: Species?): String = if (species == Species.CAT) "🐱" else "🐶"
+fun speciesEmoji(species: Species?): String = (species ?: Species.OTHER).emoji
+
+fun speciesLabel(species: Species): Int = when (species) {
+    Species.DOG -> R.string.dog
+    Species.CAT -> R.string.cat
+    Species.BIRD -> R.string.species_bird
+    Species.RABBIT -> R.string.species_rabbit
+    Species.HAMSTER -> R.string.species_hamster
+    Species.GUINEA_PIG -> R.string.species_guinea_pig
+    Species.CHINCHILLA -> R.string.species_chinchilla
+    Species.TURTLE -> R.string.species_turtle
+    Species.LIZARD -> R.string.species_lizard
+    Species.SNAKE -> R.string.species_snake
+    Species.FISH -> R.string.species_fish
+    Species.OTHER -> R.string.species_other
+}
+
+/** Every kind of pet as chips, wrapping on several lines. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SpeciesPicker(selected: Species, onSelect: (Species) -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Species.entries.forEach { s ->
+            FilterChip(
+                selected = selected == s,
+                onClick = { onSelect(s) },
+                label = { Text(s.emoji + "  " + stringResource(speciesLabel(s))) },
+            )
+        }
+    }
+}
 
 @Composable
 fun longDate(date: LocalDate): String {
@@ -116,6 +152,15 @@ fun PetAvatar(pet: Pet?, size: Dp = 44.dp) {
         contentAlignment = Alignment.Center,
     ) {
         Text(speciesEmoji(pet?.species), fontSize = (size.value * 0.5f).sp)
+        // The pet's photo over its emoji (the emoji stays if the file is gone).
+        pet?.photoPath?.let { File(it) }?.takeIf { it.exists() }?.let { photo ->
+            AsyncImage(
+                model = photo,
+                contentDescription = pet?.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(size).clip(CircleShape),
+            )
+        }
     }
 }
 

@@ -2,7 +2,10 @@
 
 *Anciennement « PetCare » : le nom affiché a changé, l'identifiant Android `com.hive4apps.petcare` reste le même pour que l'application se mette à jour par-dessus l'ancienne en gardant les données.*
 
-Application Android (français / português do Brasil) pour suivre les traitements de son chien ou de son chat.
+Application Android (français / português do Brasil) pour suivre les traitements de son animal : chien, chat,
+oiseau, lapin, hamster, cochon d'Inde, chinchilla, tortue / jabuti, lézard, serpent, poisson ou autre (les
+animaux de compagnie les plus courants au Brésil). Chaque animal peut avoir sa **photo** (appareil photo ou
+galerie : toucher l'animal sur sa fiche).
 
 1. **Nouveau suivi** : choisir un animal déjà enregistré ou en créer un (nom, chien ou chat).
 2. **Photo des documents du vétérinaire** (une photo par page, ou depuis la galerie). Le texte est lu
@@ -17,6 +20,14 @@ Application Android (français / português do Brasil) pour suivre les traitemen
    - fiche de l'animal → **Plan complet** : tous les jours du traitement, avec la progression
      (« 5 sur 14 prises faites ») ;
    - **rappels** à l'heure de chaque prise, avec les boutons « ✓ C'est fait » et « Dans 15 min ».
+5. **Historique** (fiche de l'animal → onglet *Historique*) : toutes les prises passées, jour par jour, avec
+   l'heure où elles ont été cochées ou « non coché », et un résumé par soin (période, prises faites). Il se
+   partage en texte (WhatsApp…) pour le vétérinaire. Rien ne s'y perd :
+   - supprimer un soin déjà donné au moins une fois le retire du suivi mais le garde dans l'historique (un soin
+     jamais donné, saisi par erreur, est effacé) ;
+   - **Supprimer le suivi** repart de zéro mais garde l'historique et les ordonnances ;
+   - seuls *Effacer l'historique* (menu de l'animal), la corbeille d'un soin de l'historique ou *Supprimer
+     l'animal* l'effacent.
 
 ## Ce que la lecture d'ordonnance comprend
 

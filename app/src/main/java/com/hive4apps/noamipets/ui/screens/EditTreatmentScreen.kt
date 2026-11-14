@@ -126,7 +126,7 @@ fun EditTreatmentScreen(vm: MainViewModel, treatmentId: String?, petId: String) 
                 TextButton(onClick = {
                     confirmDelete = false
                     vm.back()
-                    vm.store.deleteTreatment(existing.id)
+                    vm.store.deleteTreatment(existing.id, vm.today)
                 }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) } },
