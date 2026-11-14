@@ -81,14 +81,15 @@ HTTP directs (`core/.../AiPrescriptionReader.kt`) : le SDK Java d'Anthropic pès
 Avec [Platform Tools](https://developer.android.com/tools/releases/platform-tools) et le débogage USB activé :
 
 ```
-adb install -r noami-pets.apk
+adb install -r noami-pets-1.0.N.apk
 ```
 
 `-r` remplace la version installée **en gardant les données** (animaux, soins, historique, photos).
 À la première ouverture, autoriser les notifications pour recevoir les rappels.
 
 Chaque push sur GitHub lance le workflow **Android** : tests, compilation, APK signé publié sur la branche
-`apk-build` (`noami-pets.apk`) et dans la release « Noami Pets (dernière version) ».
+`apk-build` et dans la release « Noami Pets (dernière version) », sous le nom `noami-pets-<version>.apk`
+(ex. `noami-pets-1.0.135.apk`).
 
 ### Signature (mises à jour sans perte de données)
 
