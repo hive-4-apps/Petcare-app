@@ -13,21 +13,21 @@ plugins {
 val localSigning = rootProject.file("keystore.properties").takeIf { it.exists() }?.let { file ->
     Properties().apply { file.inputStream().use { load(it) } }
 }
-val petcareKeystore = (System.getenv("PETCARE_KEYSTORE_FILE") ?: localSigning?.getProperty("storeFile"))
+val signingKeystore = (System.getenv("PETCARE_KEYSTORE_FILE") ?: localSigning?.getProperty("storeFile"))
     ?.let { rootProject.file(it) }?.takeIf { it.exists() }
-val petcarePassword = System.getenv("PETCARE_KEYSTORE_PASSWORD") ?: localSigning?.getProperty("password")
+val signingPassword = System.getenv("PETCARE_KEYSTORE_PASSWORD") ?: localSigning?.getProperty("password")
 
 android {
-    namespace = "com.hive4apps.petcare"
+    namespace = "com.hive4apps.noamipets"
     compileSdk = 35
 
     signingConfigs {
-        if (petcareKeystore != null) {
-            create("petcare") {
-                storeFile = petcareKeystore
-                storePassword = petcarePassword
-                keyAlias = "petcare"
-                keyPassword = petcarePassword
+        if (signingKeystore != null) {
+            create("permanent") {
+                storeFile = signingKeystore
+                storePassword = signingPassword
+                keyAlias = "petcare" // alias inside the existing keystore: unchanged by the rename to Noami Pets
+                keyPassword = signingPassword
                 enableV1Signing = true
                 enableV2Signing = true
                 enableV3Signing = true
@@ -36,6 +36,7 @@ android {
     }
 
     defaultConfig {
+        // Kept from the PetCare era: changing it would make Android see a new app (no update over the installed one, data lost).
         applicationId = "com.hive4apps.petcare"
         minSdk = 26
         targetSdk = 35
@@ -53,11 +54,11 @@ android {
             // Installs next to the release build, handy to test on the phone.
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            if (petcareKeystore != null) signingConfig = signingConfigs.getByName("petcare")
+            if (signingKeystore != null) signingConfig = signingConfigs.getByName("permanent")
         }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName(if (petcareKeystore != null) "petcare" else "debug")
+            signingConfig = signingConfigs.getByName(if (signingKeystore != null) "permanent" else "debug")
         }
     }
 

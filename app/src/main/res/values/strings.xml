@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PetCare</string>
+    <string name="app_name">Noami Pets</string>
 
     <string name="tab_today">Aujourd\'hui</string>
     <string name="tab_pets">Animaux</string>
@@ -27,7 +27,7 @@
     <string name="all_done">Tous les soins du jour sont faits 🎉</string>
     <string name="done_count">%1$d sur %2$d soins faits</string>
     <string name="empty_title">Aucun suivi pour l\'instant</string>
-    <string name="empty_text">Ajoutez votre animal et prenez en photo l\'ordonnance du vétérinaire : PetCare prépare le plan de soins et vous rappelle chaque prise.</string>
+    <string name="empty_text">Ajoutez votre animal et prenez en photo l\'ordonnance du vétérinaire : Noami Pets prépare le plan de soins et vous rappelle chaque prise.</string>
     <string name="nothing_today">Rien à faire ce jour-là</string>
     <string name="nothing_today_text">Aucun médicament ni soin prévu.</string>
     <string name="new_follow_up">Nouveau suivi</string>
@@ -192,9 +192,9 @@
     <string name="import_warning">Les données actuelles seront remplacées par celles de la sauvegarde.</string>
     <string name="backup_saved">Sauvegarde enregistrée</string>
     <string name="backup_restored">Sauvegarde restaurée</string>
-    <string name="backup_invalid">Ce fichier n\'est pas une sauvegarde PetCare valide</string>
+    <string name="backup_invalid">Ce fichier n\'est pas une sauvegarde Noami Pets valide</string>
     <string name="about">À propos</string>
-    <string name="about_text">PetCare suit les traitements de vos animaux. La lecture des ordonnances se fait sur le téléphone, sans connexion, ou par l\'IA si vous l\'avez activée. Vérifiez toujours le plan avec l\'ordonnance : en cas de doute, demandez à votre vétérinaire.</string>
+    <string name="about_text">Noami Pets suit les traitements de vos animaux. La lecture des ordonnances se fait sur le téléphone, sans connexion, ou par l\'IA si vous l\'avez activée. Vérifiez toujours le plan avec l\'ordonnance : en cas de doute, demandez à votre vétérinaire.</string>
     <string name="version">Version %1$s (%2$s)</string>
     <string name="last_error">Dernière erreur</string>
 
@@ -232,7 +232,7 @@
     <string name="ai_get_key">Clé Claude (payante)</string>
     <!-- Pasted text (Google Lens...) -->
     <string name="paste_text">Coller le texte de l\'ordonnance</string>
-    <string name="paste_text_help">Gratuit, pour l\'écriture à la main : ouvrez la photo dans Google Lens (ou une appli d\'IA gratuite comme Claude ou Gemini), choisissez « Texte », copiez tout, puis collez ici. PetCare retrouve les soins sur le téléphone.</string>
+    <string name="paste_text_help">Gratuit, pour l\'écriture à la main : ouvrez la photo dans Google Lens (ou une appli d\'IA gratuite comme Claude ou Gemini), choisissez « Texte », copiez tout, puis collez ici. Noami Pets retrouve les soins sur le téléphone.</string>
     <string name="paste_text_label">Texte de l\'ordonnance</string>
     <string name="ai_on_text_gemini">Les photos des ordonnances sont envoyées à Gemini (Google) pour être lues : gratuit dans la limite de l\'offre gratuite, et Google peut s\'en servir pour améliorer ses modèles. Sans réseau, le téléphone les lit lui-même.</string>
     <string name="ai_get_key_gemini">Clé Gemini gratuite</string>

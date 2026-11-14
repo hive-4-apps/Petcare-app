@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "PetCare"
+rootProject.name = "NoamiPets"
 include(":core", ":app")

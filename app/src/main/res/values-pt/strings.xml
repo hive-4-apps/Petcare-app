@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PetCare</string>
+    <string name="app_name">Noami Pets</string>
 
     <string name="tab_today">Hoje</string>
     <string name="tab_pets">Pets</string>
@@ -27,7 +27,7 @@
     <string name="all_done">Todos os cuidados do dia foram feitos 🎉</string>
     <string name="done_count">%1$d de %2$d cuidados feitos</string>
     <string name="empty_title">Nenhum acompanhamento ainda</string>
-    <string name="empty_text">Cadastre seu pet e fotografe a receita do veterinário: o PetCare monta o plano de cuidados e lembra você de cada dose.</string>
+    <string name="empty_text">Cadastre seu pet e fotografe a receita do veterinário: o Noami Pets monta o plano de cuidados e lembra você de cada dose.</string>
     <string name="nothing_today">Nada para fazer neste dia</string>
     <string name="nothing_today_text">Nenhum remédio ou cuidado previsto.</string>
     <string name="new_follow_up">Novo acompanhamento</string>
@@ -192,9 +192,9 @@
     <string name="import_warning">Os dados atuais serão substituídos pelos do backup.</string>
     <string name="backup_saved">Backup salvo</string>
     <string name="backup_restored">Backup restaurado</string>
-    <string name="backup_invalid">Este arquivo não é um backup válido do PetCare</string>
+    <string name="backup_invalid">Este arquivo não é um backup válido do Noami Pets</string>
     <string name="about">Sobre</string>
-    <string name="about_text">O PetCare acompanha os tratamentos dos seus pets. A leitura das receitas é feita no celular, sem internet, ou pela IA se você a ativou. Sempre confira o plano com a receita: em caso de dúvida, pergunte ao seu veterinário.</string>
+    <string name="about_text">O Noami Pets acompanha os tratamentos dos seus pets. A leitura das receitas é feita no celular, sem internet, ou pela IA se você a ativou. Sempre confira o plano com a receita: em caso de dúvida, pergunte ao seu veterinário.</string>
     <string name="version">Versão %1$s (%2$s)</string>
     <string name="last_error">Último erro</string>
 
@@ -232,7 +232,7 @@
     <string name="ai_get_key">Chave Claude (paga)</string>
     <!-- Pasted text (Google Lens...) -->
     <string name="paste_text">Colar o texto da receita</string>
-    <string name="paste_text_help">Grátis, para a letra à mão: abra a foto no Google Lens (ou num app de IA gratuito como Claude ou Gemini), escolha \u201cTexto\u201d, copie tudo e cole aqui. O PetCare encontra os cuidados no próprio celular.</string>
+    <string name="paste_text_help">Grátis, para a letra à mão: abra a foto no Google Lens (ou num app de IA gratuito como Claude ou Gemini), escolha \u201cTexto\u201d, copie tudo e cole aqui. O Noami Pets encontra os cuidados no próprio celular.</string>
     <string name="paste_text_label">Texto da receita</string>
     <string name="ai_on_text_gemini">As fotos das receitas são enviadas ao Gemini (Google) para serem lidas: grátis dentro do limite da oferta gratuita, e o Google pode usá-las para melhorar os modelos dele. Sem internet, o próprio celular as lê.</string>
     <string name="ai_get_key_gemini">Chave Gemini grátis</string>
